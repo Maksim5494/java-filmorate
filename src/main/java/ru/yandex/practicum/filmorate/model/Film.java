@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
-    private int id; // id обычно не валидируется при создании (генерируется)
+    private int id;
 
     @NotBlank(message = "Название не может быть пустым")
     private String name;
