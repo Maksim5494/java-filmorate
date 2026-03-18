@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Data
 public class Film {
     private int id;
-    @NotNull
+    @org.jetbrains.annotations.NotNull
     private String name;
     private String description;
     @NotNull
