@@ -25,7 +25,9 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleThrowable(final Throwable e) {
-        log.error("Unhandled exception", e); // Полезно логировать саму ошибку
+        if (log.isErrorEnabled()) {
+            log.error("Unhandled exception", e);
+        }
         return Map.of("error", "Произошла непредвиденная ошибка.");
     }
 
@@ -42,7 +44,7 @@ public class ErrorHandler {
                 .collect(Collectors.toMap(
                         error -> error.getField(),
                         error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Ошибка валидации",
-                        (existing, replacement) -> existing // если для одного поля несколько ошибок, берем первую
+                        (existing, replacement) -> existing
                 ));
     }
 }
