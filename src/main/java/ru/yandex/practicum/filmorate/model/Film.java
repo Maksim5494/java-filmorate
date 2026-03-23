@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import org.slf4j.Marker;
+
 import java.time.LocalDate;
 
 @Data
@@ -22,4 +24,12 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
+
+    public Marker getLikes() {
+        return null;
+    }
+
+    public int getLikesCount() {
+        return 0;
+    }
 }
