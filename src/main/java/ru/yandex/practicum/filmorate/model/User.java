@@ -5,13 +5,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
-
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
-    private int id;
+    private long id;
 
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Некорректный формат email")
@@ -26,6 +26,5 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
-    private List<User> friends;
-
+    private Set<Long> friends = new HashSet<>();
 }

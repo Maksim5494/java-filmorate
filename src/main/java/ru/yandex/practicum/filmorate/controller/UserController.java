@@ -2,60 +2,77 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int counter = 1;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        validate(user);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(counter++);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно добавлен: {}", user);
-        return user;
+        log.info("Добавление пользователя: {}", user);
+        return userService.create(user); // Передаем логику создания (и установку имени) в сервис
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            log.error("Пользователь с ID {} не найден", user.getId());
-            throw new NotFoundException("Пользователь с таким ID не существует");
+        log.info("Обновление пользователя: {}", user);
+        return userService.update(user);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable long id) {
+        log.info("Запрос пользователя ID {}", id);
+        try {
+            User user = userService.findUserById(id);
+            return ResponseEntity.ok(user);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-        validate(user);
-        users.put(user.getId(), user);
-        log.info("Пользователь с ID {} успешно обновлен", user.getId());
-        return user;
+    }
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("Пользователь {} добавляет в друзья {}", id, friendId);
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("Пользователь {} удаляет из друзей {}", id, friendId);
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable long id) {
+        Collection<User> users = userService.getFriends(id);
+        return new ArrayList<>(users);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 
     @GetMapping
     public List<User> getAllUsers() {
-        log.info("Получен запрос на список всех пользователей");
-        return new ArrayList<>(users.values());
+        Collection<User> users = userService.findAll();
+        return new ArrayList<>(users);
     }
 
-    private void validate(User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта некорректна");
-        }
-        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может быть пустым или содержать пробелы");
-        }
-    }
 }
-

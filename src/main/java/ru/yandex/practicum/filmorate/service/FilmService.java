@@ -1,57 +1,68 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private List<Film> filmsWithLikes;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
-        this.filmsWithLikes = new ArrayList<>(filmStorage.getAllFilms());
+        this.userStorage = userStorage;
     }
 
-    public void addLike(long filmId, long userId) {
-        Film film = findFilmById(filmId);
-        if (film == null) {
-            throw new IllegalArgumentException("Фильм не найден");
+    public void addLike(Long filmId, Long userId) {
+        Film film = filmStorage.findFilmById(filmId);
+        if (userStorage.findUserById(userId) == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
+        film.getLikes().add(userId);
+        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
+    }
+
+    public void removeLike(Long filmId, Long userId) {
+        Film film = filmStorage.findFilmById(filmId);
         if (!film.getLikes().contains(userId)) {
-            film.getLikes().add(userId);
-            filmStorage.modifyFilm(film);
+            throw new NotFoundException("Лайк от пользователя " + userId + " не найден");
         }
+        film.getLikes().remove(userId);
+        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
-    public void removeLike(long filmId, long userId) {
-        Film film = findFilmById(filmId);
-        if (film == null) {
-            throw new IllegalArgumentException("Фильм не найден");
-        }
-        film.getLikes().removeIf(id -> id == userId);
-        filmStorage.modifyFilm(film);
+    public List<Film> getPopularFilms(int count) {
+        return filmStorage.getAllFilms().stream()
+                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
-    public List<Film> getTopPopularFilms() {
-        Collections.sort(filmsWithLikes, (f1, f2) -> Integer.compare(f2.getLikesCount(), f1.getLikesCount()));
-        return filmsWithLikes.subList(0, Math.min(10, filmsWithLikes.size()));
+    public Collection<Film> findAll() {
+        return filmStorage.getAllFilms();
     }
 
-    private Film findFilmById(long id) {
-        for (Film film : filmsWithLikes) {
-            if (film.getId() == id) {
-                return film;
-            }
-        }
-        return null;
+    public Film create(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film update(Film film) {
+        return filmStorage.modifyFilm(film);
+    }
+
+    public Film getById(Long id) {
+        return filmStorage.findFilmById(id);
     }
 }
 
