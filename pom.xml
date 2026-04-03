@@ -54,18 +54,25 @@
 		<scope>test</scope>
 	</dependency>
 
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>RELEASE</version>
-        <scope>test</scope>
-    </dependency>
+	<dependency>
+		<groupId>org.junit.jupiter</groupId>
+		<artifactId>junit-jupiter</artifactId>
+		<version>5.10.0</version> <!-- актуальная версия на момент ответа -->
+		<scope>test</scope>
+	</dependency>
+
+	<dependency>
+		<groupId>org.junit.jupiter</groupId>
+		<artifactId>junit-jupiter-params</artifactId>
+		<version>5.10.0</version>
+		<scope>test</scope>
+	</dependency>
+
 
 	<dependency>
 		<groupId>org.jetbrains</groupId>
 		<artifactId>annotations</artifactId>
-		<version>RELEASE</version>
-		<scope>compile</scope>
+		<version>24.0.1</version>
 	</dependency>
 
 </dependencies>
