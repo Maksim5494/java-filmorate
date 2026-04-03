@@ -90,6 +90,7 @@ public class FilmValidationTest {
     @Test
     public void testRemoveLikeSuccess() throws Exception {
         Film film = new Film("Тестовый фильм");
+        film.setReleaseDate(LocalDate.now());
         filmService.create(film);
         Long filmId = film.getId();
         Long userId = 1L;
@@ -104,6 +105,7 @@ public class FilmValidationTest {
     @Test
     void testRemoveLikeNotFound() throws Exception {
         Film film = new Film("Тестовый фильм для проверки ошибки");
+        film.setReleaseDate(LocalDate.now());
         filmService.create(film);
         Long filmId = film.getId();
         Long nonExistingUserId = 999L;
