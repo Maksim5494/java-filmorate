@@ -74,7 +74,6 @@ public class FilmValidationTest {
         userService.create(user);
         Long userId = user.getId();
 
-        // Создаём фильмы
         Film film1 = new Film("Фильм 1");
         film1.setLikes(Set.of(userId));
         filmService.create(film1);

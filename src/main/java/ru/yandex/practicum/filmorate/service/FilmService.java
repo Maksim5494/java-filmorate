@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,8 +55,20 @@ public class FilmService {
     }
 
     public Film create(Film film) {
+        if (film.getReleaseDate() == null) {
+            throw new IllegalArgumentException("Дата релиза фильма не может быть null");
+        }
+
+        LocalDate minAllowedDate = LocalDate.of(1888, 1, 1);
+        if (film.getReleaseDate().isBefore(minAllowedDate)) {
+            throw new IllegalArgumentException(
+                    "Дата релиза не может быть раньше " + minAllowedDate
+            );
+        }
+
         return filmStorage.addFilm(film);
     }
+
 
     public Film update(Film film) {
         Film existingFilm = filmStorage.findFilmById(film.getId());
