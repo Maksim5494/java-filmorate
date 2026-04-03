@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +24,7 @@ public class FilmValidationTest {
 
     @Test
     public void testFilmValidation() {
+        System.out.println("Validator is " + (validator == null ? "null" : "initialized"));
         Film film = new Film();
         film.setName("");
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
@@ -32,3 +33,4 @@ public class FilmValidationTest {
         assertThat(violations).isNotEmpty();
     }
 }
+
