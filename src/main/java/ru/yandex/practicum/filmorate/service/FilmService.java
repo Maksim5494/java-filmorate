@@ -58,7 +58,10 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-
+        Film existingFilm = filmStorage.findFilmById(film.getId());
+        if (existingFilm == null) {
+            throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
+        }
         return filmStorage.modifyFilm(film);
     }
 
@@ -67,12 +70,16 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
-        filmStorage.deleteFilm(id); // Предполагаем, что в FilmStorage есть такой метод
+        filmStorage.deleteFilm(id);
         log.info("Фильм {} был удалён", id);
     }
 
     public Film getById(Long id) {
-        return filmStorage.findFilmById(id);
+        Film film = filmStorage.findFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        return film;
     }
 }
 
