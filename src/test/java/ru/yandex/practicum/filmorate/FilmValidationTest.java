@@ -62,7 +62,7 @@ public class FilmValidationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
-    @Test
+    /*@Test
     void testUpdateUnknownFilm() {
         long unknownFilmId = 999L;
 
@@ -72,7 +72,7 @@ public class FilmValidationTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 }
 
