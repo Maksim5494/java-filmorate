@@ -45,7 +45,7 @@ class UserValidationTest {
     }
 
     @Test
-    void testAddFriendWithUnknownUser() {
+    void testAddFriendWithUnknownUser() throws Exception {
         long existingUserId = 1L;
         long unknownFriendId = 999L;
 

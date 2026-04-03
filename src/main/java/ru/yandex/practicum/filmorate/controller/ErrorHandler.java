@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
+import java.util.Map;
+
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -19,8 +21,8 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        return new ErrorResponse("Объект не найден", e.getMessage());
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
