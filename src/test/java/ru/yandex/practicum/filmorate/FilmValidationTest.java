@@ -12,8 +12,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -33,6 +37,9 @@ public class FilmValidationTest {
 
     @Autowired
     private FilmService filmService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -62,15 +69,50 @@ public class FilmValidationTest {
         likeIds.add(1L);
         likeIds.add(2L);
 
+        User user = new User();
+        user.setName("Тестовый пользователь");
+        userService.create(user);
+        Long userId = user.getId();
+
+        // Создаём фильмы
         Film film1 = new Film("Фильм 1");
-        film1.setLikes(likeIds);
+        film1.setLikes(Set.of(userId));
         filmService.create(film1);
 
         Film film2 = new Film("Фильм 2");
-        film2.setLikes(Set.of(3L, 4L));
+        film2.setLikes(Set.of(2L, 3L));
         filmService.create(film2);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+
+    @Test
+    public void testRemoveLikeSuccess() throws Exception {
+        Film film = new Film("Тестовый фильм");
+        filmService.create(film);
+        Long filmId = film.getId();
+        Long userId = 1L;
+
+        filmService.addLike(filmId, userId);
+
+        filmService.removeLike(filmId, userId);
+        Film updatedFilm = filmService.getById(filmId);
+        assertThat(updatedFilm.getLikes()).doesNotContain(userId);
+    }
+
+    @Test
+    void testRemoveLikeNotFound() throws Exception {
+        Film film = new Film("Тестовый фильм для проверки ошибки");
+        filmService.create(film);
+        Long filmId = film.getId();
+        Long nonExistingUserId = 999L;
+
+        try {
+            filmService.removeLike(filmId, nonExistingUserId);
+            fail("Ожидалось исключение NotFoundException, но его не было");
+        } catch (NotFoundException e) {
+            assertThat(e.getMessage()).contains("Лайк от пользователя " + nonExistingUserId + " не найден");
+        }
     }
 
 }
