@@ -7,7 +7,7 @@ public interface FilmStorage {
 
     Film addFilm(Film film);
 
-    void removeFilm(Long id);
+    void deleteFilm(Long id);
 
     Film modifyFilm(Film film);
 
