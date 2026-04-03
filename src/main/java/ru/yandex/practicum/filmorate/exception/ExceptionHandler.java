@@ -11,4 +11,3 @@ public class ExceptionHandler {
     public void handleNotFoundException() {
     }
 }
-
