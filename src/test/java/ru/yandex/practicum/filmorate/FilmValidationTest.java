@@ -75,11 +75,13 @@ public class FilmValidationTest {
         Long userId = user.getId();
 
         Film film1 = new Film("Фильм 1");
+        film1.setReleaseDate(LocalDate.now());
         film1.setLikes(Set.of(userId));
         filmService.create(film1);
 
         Film film2 = new Film("Фильм 2");
-        film2.setLikes(Set.of(2L, 3L));
+        film2.setReleaseDate(LocalDate.of(2023, 1, 1));
+        film2.setLikes(Set.of());
         filmService.create(film2);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
