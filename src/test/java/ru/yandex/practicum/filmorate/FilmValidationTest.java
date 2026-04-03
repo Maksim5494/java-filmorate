@@ -23,11 +23,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.result.StatusResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
