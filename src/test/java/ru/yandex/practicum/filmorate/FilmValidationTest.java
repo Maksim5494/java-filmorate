@@ -65,6 +65,8 @@ public class FilmValidationTest {
             filmService.removeFilm(film.getId());
         }
 
+        assertThat(filmService.findAll()).isEmpty();
+
         Set<Long> likeIds = new HashSet<>();
         likeIds.add(1L);
         likeIds.add(2L);
@@ -76,12 +78,10 @@ public class FilmValidationTest {
 
         Film film1 = new Film("Фильм 1");
         film1.setReleaseDate(LocalDate.now());
-        film1.setLikes(Set.of(userId));
         filmService.create(film1);
 
         Film film2 = new Film("Фильм 2");
         film2.setReleaseDate(LocalDate.of(2023, 1, 1));
-        film2.setLikes(Set.of());
         filmService.create(film2);
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
