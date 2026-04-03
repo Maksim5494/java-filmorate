@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -47,7 +48,6 @@ public class FilmValidationTest {
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertThat(violations).isNotEmpty();
 
-        // Выводим все нарушения в консоль для отладки
         violations.forEach(violation -> System.out.println(violation.getMessage()));
     }
 
@@ -55,22 +55,22 @@ public class FilmValidationTest {
     void setUp() {
         Collection<Film> allFilms = filmService.findAll();
         for (Film film : allFilms) {
-            filmService.removeFilm(film.getId()); // если такой метод есть
+            filmService.removeFilm(film.getId());
         }
+
+        Set<Long> likeIds = new HashSet<>();
+        likeIds.add(1L);
+        likeIds.add(2L);
+
+        Film film1 = new Film("Фильм 1");
+        film1.setLikes(likeIds);
+        filmService.create(film1);
+
+        Film film2 = new Film("Фильм 2");
+        film2.setLikes(Set.of(3L, 4L));
+        filmService.create(film2);
+
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
-    /*@Test
-    void testUpdateUnknownFilm() {
-        long unknownFilmId = 999L;
-
-        try {
-            mockMvc.perform(put("/films/" + unknownFilmId))
-                    .andExpect(status().isNotFound()); // ожидаем 404
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
 }
-
