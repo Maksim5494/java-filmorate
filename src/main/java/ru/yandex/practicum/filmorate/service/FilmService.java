@@ -36,12 +36,16 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         Film film = filmStorage.findFilmById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Фильм с ID " + filmId + " не найден");
+        }
         if (!film.getLikes().contains(userId)) {
             throw new NotFoundException("Лайк от пользователя " + userId + " не найден");
         }
         film.getLikes().remove(userId);
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
+
 
     public List<Film> getPopularFilms(int count) {
         return filmStorage.getAllFilms().stream()

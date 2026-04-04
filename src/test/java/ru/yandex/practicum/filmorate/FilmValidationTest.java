@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
@@ -107,6 +107,13 @@ public class FilmValidationTest {
     void testRemoveLikeForNonExistingFilm() throws Exception {
         Long nonExistingFilmId = 999L;
         Long userId = 1L;
+
+        try {
+            filmService.removeLike(nonExistingFilmId, userId);
+            fail("Ожидалось исключение NotFoundException, но его не было");
+        } catch (NotFoundException e) {
+            assertThat(e.getMessage()).contains("Фильм с ID " + nonExistingFilmId + " не найден");
+        }
     }
 
 
@@ -127,4 +134,50 @@ public class FilmValidationTest {
         }
     }
 
+    @Test
+    void testGetPopularFilms() {
+        // Создаём несколько фильмов с разным количеством лайков
+        Film film1 = new Film("Фильм 1");
+        film1.setReleaseDate(LocalDate.now());
+        filmService.create(film1);
+
+        Film film2 = new Film("Фильм 2");
+        film2.setReleaseDate(LocalDate.of(2023, 1, 1));
+        filmService.create(film2);
+
+        // Добавляем пользователя в систему
+        User user1 = new User();
+        user1.setName("Пользователь 1");
+        userService.create(user1);
+        Long userId1 = user1.getId();
+
+        User user2 = new User();
+        user2.setName("Пользователь 2");
+        userService.create(user2);
+        Long userId2 = user2.getId();
+
+        // Эмуляция лайков (2 для film1, 1 для film2, 0 для film3)
+        filmService.addLike(film1.getId(), userId1);
+        filmService.addLike(film1.getId(), userId2);
+
+    }
+
+    @Test
+    void testGetPopularFilms_WhenAllFilmsHaveSameLikes() {
+        // Создаём пользователя с ID, который будем использовать для лайков
+        User user = new User();
+        user.setName("Тестовый пользователь");
+        Long userId = userService.create(user).getId(); // Сохраняем ID созданного пользователя
+
+        // Теперь создаём фильмы и ставим лайки от имени этого пользователя
+        Film film1 = new Film("Фильм 1");
+        film1.setReleaseDate(LocalDate.now());
+        filmService.create(film1);
+        filmService.addLike(film1.getId(), userId); // Используем ID реального пользователя
+
+        Film film2 = new Film("Фильм 2");
+        film2.setReleaseDate(LocalDate.of(2023, 1, 1));
+        filmService.create(film2);
+        filmService.addLike(film2.getId(), userId);
+    }
 }
