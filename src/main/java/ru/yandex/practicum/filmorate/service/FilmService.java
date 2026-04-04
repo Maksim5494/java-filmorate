@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage, UserService userService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.userService = userService;
     }
 
     public void addLike(Long filmId, Long userId) {
@@ -103,6 +106,22 @@ public class FilmService {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         return film;
+    }
+
+    public void addToFavorites(Long filmId, Long userId) {
+        Film film = filmStorage.findFilmById(filmId);
+        if (film == null) {
+            throw new NotFoundException("Фильм с ID " + filmId + " не найден");
+        }
+
+        User user = userService.findUserById(userId); // Используем userService для поиска пользователя
+        if (user == null) {
+            throw new NotFoundException("Пользователь с ID " + userId + " не найден");
+        }
+
+        // Добавляем фильм в список избранного пользователя
+        user.getFavoriteFilms().add(film);
+        userService.update(user); // Используем userService для обновления пользователя
     }
 }
 
