@@ -7,6 +7,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -27,4 +28,10 @@ public class User {
     private LocalDate birthday;
 
     private Set<Long> friends = new HashSet<>();
+
+    // Реализуем метод для получения любимых фильмов
+    // Добавляем поле для хранения любимых фильмов
+    private Set<Film> favoriteFilms = new HashSet<>();
+
 }
+
