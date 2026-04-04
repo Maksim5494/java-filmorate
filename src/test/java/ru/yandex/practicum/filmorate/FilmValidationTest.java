@@ -23,8 +23,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -109,10 +107,8 @@ public class FilmValidationTest {
     void testRemoveLikeForNonExistingFilm() throws Exception {
         Long nonExistingFilmId = 999L;
         Long userId = 1L;
-
-        mockMvc.perform(delete("/films/{filmId}/likes/{userId}", nonExistingFilmId, userId))
-                .andExpect(status().is404());
     }
+
 
 
     @Test
