@@ -39,6 +39,11 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         Film film = getById(filmId);
+
+        if (getById(filmId) == null) {
+            throw new NotFoundException("Фильм с идентификатором " + filmId + " не найден");
+        }
+
         User user = userStorage.findUserById(userId);
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + userId + " не найден");
