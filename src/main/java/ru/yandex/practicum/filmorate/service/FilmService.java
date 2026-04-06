@@ -41,7 +41,7 @@ public class FilmService {
         Film film = getById(filmId);
 
         if (getById(filmId) == null) {
-            throw new NotFoundException("Фильм с идентификатором " + filmId + " не найден");
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
         }
 
         User user = userStorage.findUserById(userId);

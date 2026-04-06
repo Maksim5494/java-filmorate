@@ -108,7 +108,7 @@ public class FilmValidationTest {
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
             System.out.println("Точное сообщение исключения: " + e.getMessage());
-            String expectedMessage = "Фильм с идентификатором " + nonExistingFilmId + " не найден";
+            String expectedMessage = "Фильм с id " + nonExistingFilmId + " не найден";
             assertThat(e.getMessage()).contains(expectedMessage);
         }
     }
