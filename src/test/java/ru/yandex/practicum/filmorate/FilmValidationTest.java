@@ -130,7 +130,7 @@ public class FilmValidationTest {
             filmService.removeLike(filmId, nonExistingUserId);
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
-            String expectedMessage = "Лайк от пользователя 999 не найден";
+            String expectedMessage = "Пользователь с ID 999 не найден";
             assertThat(e.getMessage()).contains(expectedMessage);
            // assertThat(e.getMessage()).contains("Лайк от пользователя " + nonExistingUserId + " не найден");
         }
