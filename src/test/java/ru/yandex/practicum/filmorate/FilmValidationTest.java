@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import sun.nio.fs.WindowsException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -107,7 +108,12 @@ public class FilmValidationTest {
             filmService.removeLike(nonExistingFilmId, userId);
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
+            System.out.println("Фактическое сообщение: " + e.getMessage()); // выведет реальное сообщение
             assertThat(e.getMessage()).contains("Фильм с ID " + nonExistingFilmId + " не найден");
+
+
+
+            // assertThat(e.getMessage()).contains("Фильм с ID " + nonExistingFilmId + " не найден");
         }
     }
 
@@ -125,7 +131,9 @@ public class FilmValidationTest {
             filmService.removeLike(filmId, nonExistingUserId);
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
-            assertThat(e.getMessage()).contains("Лайк от пользователя " + nonExistingUserId + " не найден");
+            String expectedMessage = "Лайк от пользователя 999 не найден";
+            assertThat(e.getMessage()).contains(expectedMessage);
+           // assertThat(e.getMessage()).contains("Лайк от пользователя " + nonExistingUserId + " не найден");
         }
     }
 
