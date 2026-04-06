@@ -10,7 +10,6 @@ import jakarta.validation.Validator;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -19,8 +18,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -59,48 +56,33 @@ public class FilmValidationTest {
         violations.forEach(violation -> System.out.println(violation.getMessage()));
     }
 
+    private Long testUserId;
+
     @BeforeEach
     void setUp() {
-        Collection<Film> allFilms = filmService.findAll();
-        for (Film film : allFilms) {
-            filmService.removeFilm(film.getId());
-        }
+        // Очистка
+        filmService.findAll().forEach(f -> filmService.removeFilm(f.getId()));
 
-        assertThat(filmService.findAll()).isEmpty();
-
-        Set<Long> likeIds = new HashSet<>();
-        likeIds.add(1L);
-        likeIds.add(2L);
-
+        // Создаем пользователя и сохраняем его РЕАЛЬНЫЙ ID
         User user = new User();
+        user.setEmail("test@yandex.ru");
+        user.setLogin("test");
         user.setName("Тестовый пользователь");
-        userService.create(user);
-        Long userId = user.getId();
-
-        Film film1 = new Film("Фильм 1");
-        film1.setReleaseDate(LocalDate.now());
-        filmService.create(film1);
-
-        Film film2 = new Film("Фильм 2");
-        film2.setReleaseDate(LocalDate.of(2023, 1, 1));
-        filmService.create(film2);
-
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        user = userService.create(user);
+        testUserId = user.getId();
     }
 
     @Test
-    public void testRemoveLikeSuccess() throws Exception {
+    public void testRemoveLikeSuccess() {
         Film film = new Film("Тестовый фильм");
         film.setReleaseDate(LocalDate.now());
-        filmService.create(film);
-        Long filmId = film.getId();
-        Long userId = 1L;
+        film = filmService.create(film);
 
-        filmService.addLike(filmId, userId);
+        filmService.addLike(film.getId(), testUserId); // используем ID из setUp
+        filmService.removeLike(film.getId(), testUserId);
 
-        filmService.removeLike(filmId, userId);
-        Film updatedFilm = filmService.getById(filmId);
-        assertThat(updatedFilm.getLikes()).doesNotContain(userId);
+        assertThat(filmService.getById(film.getId()).getLikes()).doesNotContain(testUserId);
     }
 
     @Test

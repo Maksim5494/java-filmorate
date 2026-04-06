@@ -29,8 +29,8 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.findFilmById(filmId);
-        if (userStorage.findUserById(userId) == null) {
+        Film film = getById(filmId); // Используем внутренний метод, который кинет 404 если надо
+        if (userService.findUserById(userId) == null) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         film.getLikes().add(userId);
@@ -38,9 +38,10 @@ public class FilmService {
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.findFilmById(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с ID " + filmId + " не найден");
+        Film film = getById(filmId);
+        // Проверка существования пользователя перед удалением лайка
+        if (userService.findUserById(userId) == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
         if (!film.getLikes().contains(userId)) {
             throw new NotFoundException("Лайк от пользователя " + userId + " не найден");
