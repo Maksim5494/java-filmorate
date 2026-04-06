@@ -107,16 +107,11 @@ public class FilmValidationTest {
             filmService.removeLike(nonExistingFilmId, userId);
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
-            System.out.println("Фактическое сообщение: " + e.getMessage()); // выведет реальное сообщение
-            assertThat(e.getMessage()).contains("Фильм с ID " + nonExistingFilmId + " не найден");
-
-
-
-            // assertThat(e.getMessage()).contains("Фильм с ID " + nonExistingFilmId + " не найден");
+            System.out.println("Точное сообщение исключения: " + e.getMessage());
+            String expectedMessage = "Фильм с идентификатором " + nonExistingFilmId + " не найден";
+            assertThat(e.getMessage()).contains(expectedMessage);
         }
     }
-
-
 
     @Test
     void testRemoveLikeNotFound() throws Exception {
