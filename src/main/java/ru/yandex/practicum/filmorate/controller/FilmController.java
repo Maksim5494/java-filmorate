@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +49,11 @@ public class FilmController {
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
 
         filmService.removeLike(id, userId);
+    }
+
+    @PostMapping("/{filmId}/favorite")
+    public void addFilmToFavorites(@PathVariable Long filmId, @AuthenticationPrincipal User currentUser) {
+        filmService.addToFavorites(filmId, currentUser.getId());
     }
 
     @GetMapping("/popular")
