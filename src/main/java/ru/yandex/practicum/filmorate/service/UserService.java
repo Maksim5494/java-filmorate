@@ -91,13 +91,11 @@ public class UserService {
         return userStorage.modifyUser(user);
     }
 
-    public Collection<Film> getFavoriteFilms(Long userId) {
-        User user = userStorage.findUserById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с ID " + userId + " не найден");
-        }
-        return user.getFavoriteFilms();
+    public Set<Film> getFavoriteFilms(Long userId) {
+        User user = getUserOrThrow(userId);
+        return user.getFavoriteFilms(); // Возвращаем реальную коллекцию
     }
+
 
     @RestControllerAdvice
     public class GlobalExceptionHandler {
@@ -107,5 +105,20 @@ public class UserService {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND); // 404
         }
     }
+
+    public void addToFavorites(Long userId, Long filmId) {
+        User user = getUserOrThrow(userId);  // Получаем пользователя
+        Film film = filmStorage.findFilmById(filmId);  // Ищем фильм
+
+        if (film == null) {
+            throw new NotFoundException("Фильм с ID " + filmId + " не найден");
+        }
+
+        user.getFavoriteFilms().add(film);  // Добавляем фильм в избранное
+        log.info("Фильм {} добавлен в избранное пользователем {}", film.getTitle(), userId);
+
+        userStorage.modifyUser(user);  // Сохраняем изменения пользователя
+    }
+
 }
 

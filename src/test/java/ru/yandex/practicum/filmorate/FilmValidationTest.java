@@ -50,7 +50,7 @@ public class FilmValidationTest {
     public void testFilmValidation() {
         System.out.println("Validator is " + (validator == null ? "null" : "initialized"));
         Film film = new Film();
-        film.setName("");
+        film.setTitle("");
         film.setReleaseDate(LocalDate.of(1895, 12, 27));
         film.setDuration(120);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
