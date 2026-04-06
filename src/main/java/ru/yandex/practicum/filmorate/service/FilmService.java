@@ -48,11 +48,6 @@ public class FilmService {
         if (user == null) {
             throw new NotFoundException("Пользователь с ID " + userId + " не найден");
         }
-
-        // Проверка существования пользователя перед удалением лайка
-        if (userService.findUserById(userId) == null) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
         if (!film.getLikes().contains(userId)) {
             throw new NotFoundException("Лайк от пользователя " + userId + " не найден");
         }
