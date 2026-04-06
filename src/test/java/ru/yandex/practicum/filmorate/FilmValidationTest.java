@@ -18,7 +18,9 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,8 +62,19 @@ public class FilmValidationTest {
 
     @BeforeEach
     void setUp() {
-        // Очистка
-        filmService.findAll().forEach(f -> filmService.removeFilm(f.getId()));
+        // Получаем список всех фильмов, извлекаем их ID и сохраняем в новый список (копию)
+        List<Long> filmIds = filmService.findAll().stream()
+                .map(Film::getId)
+                .collect(Collectors.toList());
+
+        // Теперь удаляем по ID из независимого списка
+        filmIds.forEach(id -> filmService.removeFilm(id));
+
+        // То же самое стоит сделать для пользователей, если их много
+        List<Long> userIds = userService.findAll().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+        userIds.forEach(id -> userService.removeUser(id));
 
         // Создаем пользователя и сохраняем его РЕАЛЬНЫЙ ID
         User user = new User();

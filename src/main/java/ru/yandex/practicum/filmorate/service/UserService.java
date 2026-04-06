@@ -96,6 +96,18 @@ public class UserService {
         return user.getFavoriteFilms(); // Возвращаем реальную коллекцию
     }
 
+    public void removeUser(Long userId) {
+        User user = userStorage.findUserById(userId);
+
+        if (user == null) {
+            throw new NotFoundException("Пользователь с ID " + userId + " не найден");
+        }
+
+        userStorage.removeUser(userId);  // предполагаемый метод удаления из хранилища
+        log.info("Пользователь с ID {} удалён", userId);
+    }
+
+
 
     @RestControllerAdvice
     public class GlobalExceptionHandler {
