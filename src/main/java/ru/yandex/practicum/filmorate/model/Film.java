@@ -4,7 +4,9 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,6 +21,8 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
     // Добавили поле для rating
+    @Min(value = 1, message = "Рейтинг не может быть меньше 1")
+    @Max(value = 10, message = "Рейтинг не может превышать 10")
     private int rating;
     private Set<Long> likes = new HashSet<>();
 
@@ -38,8 +42,23 @@ public class Film {
         this.rating = rating; // Теперь rating сохраняется
     }
 
-    public int getLikesCount() {
-        return likes.size();
+    @Data
+    public class LikesInfo {
+        private final int count;
+        private final List<Long> userIds;
+
+        public LikesInfo(int count, List<Long> userIds) {
+            this.count = count;
+            this.userIds = userIds;
+        }
     }
+
+    public LikesInfo getLikesInfo() {
+        return new LikesInfo(
+                this.likes.size(),
+                new ArrayList<>(this.likes)
+        );
+    }
+
 }
 

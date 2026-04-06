@@ -2,16 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -107,30 +103,34 @@ public class UserService {
         log.info("Пользователь с ID {} удалён", userId);
     }
 
+    public AddToFavoritesResult addToFavorites(Long userId, Long filmId) {
+        User user = getUserOrThrow(userId);
+        Film film = filmStorage.findFilmById(filmId);
 
-
-    @RestControllerAdvice
-    public class GlobalExceptionHandler {
-
-        @ExceptionHandler(NotFoundException.class)
-        public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND); // 404
-        }
-    }
-
-    public void addToFavorites(Long userId, Long filmId) {
-        User user = getUserOrThrow(userId);  // Получаем пользователя
-        Film film = filmStorage.findFilmById(filmId);  // Ищем фильм
-
+        // Если фильм не найден — возвращаем соответствующий статус
         if (film == null) {
-            throw new NotFoundException("Фильм с ID " + filmId + " не найден");
+            return new AddToFavoritesResult(
+                    false,
+                    "Фильм с ID " + filmId + " не найден"
+            );
         }
 
-        user.getFavoriteFilms().add(film);  // Добавляем фильм в избранное
-        log.info("Фильм {} добавлен в избранное пользователем {}", film.getTitle(), userId);
-
-        userStorage.modifyUser(user);  // Сохраняем изменения пользователя
+        // Проверяем, есть ли фильм уже в избранном
+        if (user.getFavoriteFilms().contains(film)) {
+            log.info("Пользователь {} уже добавил фильм {} в избранное", userId, film.getTitle());
+            return new AddToFavoritesResult(
+                    false,
+                    "Фильм уже добавлен в избранное"
+            );
+        } else {
+            user.getFavoriteFilms().add(film);
+            log.info("Фильм {} добавлен в избранное пользователем {}", film.getTitle(), userId);
+            userStorage.modifyUser(user);
+            return new AddToFavoritesResult(
+                    true,
+                    "Успешное добавление в избранное"
+            );
+        }
     }
-
 }
 
