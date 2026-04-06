@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,13 +74,5 @@ public class UserController {
         Collection<User> users = userService.findAll();
         return new ArrayList<>(users);
     }
-
-    @RestControllerAdvice
-    public class GlobalExceptionHandler {
-
-        @ExceptionHandler(NotFoundException.class)
-        public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND); // 404
-        }
-    }
 }
+
