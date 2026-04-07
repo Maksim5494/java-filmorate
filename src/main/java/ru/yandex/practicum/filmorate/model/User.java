@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,7 +19,10 @@ public class User {
     @Pattern(regexp = "^\\S+$", message = "Логин не может содержать пробелы")
     private String login;
 
+    @NotBlank(message = "Имя не может быть пустым")
+    @Size(min = 2, max = 100, message = "Длина имени должна быть от 2 до 100 символов")
     private String name;
+
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;

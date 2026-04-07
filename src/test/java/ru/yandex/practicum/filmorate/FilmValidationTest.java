@@ -10,6 +10,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -62,6 +63,8 @@ public class FilmValidationTest {
 
     @BeforeEach
     void setUp() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
         // Получаем список всех фильмов, извлекаем их ID и сохраняем в новый список (копию)
         List<Long> filmIds = filmService.findAll().stream()
                 .map(Film::getId)
@@ -107,7 +110,7 @@ public class FilmValidationTest {
             filmService.removeLike(nonExistingFilmId, userId);
             fail("Ожидалось исключение NotFoundException, но его не было");
         } catch (NotFoundException e) {
-            System.out.println("Точное сообщение исключения: " + e.getMessage());
+            //System.out.println("Точное сообщение исключения: " + e.getMessage());
             String expectedMessage = "Фильм с id " + nonExistingFilmId + " не найден";
             assertThat(e.getMessage()).contains(expectedMessage);
         }
@@ -157,10 +160,24 @@ public class FilmValidationTest {
         filmService.addLike(film1.getId(), userId1);
         filmService.addLike(film1.getId(), userId2);
 
+        filmService.addLike(film2.getId(), userId1);
+
+
+        int limit = 5; // допустим, мы хотим получить топ-5 популярных фильмов
+        int expectedSize = 2; // ожидаем, что в топе будет 2 фильма (зависит от логики теста)
+
+
+        List<Film> popularFilms = filmService.getPopularFilms(limit);
+        assertThat(popularFilms).hasSize(expectedSize);
+        // или другие проверки — порядок, количество лайков и т. д.
+
     }
 
     @Test
     void testGetPopularFilms_WhenAllFilmsHaveSameLikes() {
+
+        int limit = 5; // или любое другое нужное значение
+        int expectedSize = 2; // ожидаемое количество фильмов в топе
         // Создаём пользователя с ID, который будем использовать для лайков
         User user = new User();
         user.setName("Тестовый пользователь");
@@ -176,5 +193,10 @@ public class FilmValidationTest {
         film2.setReleaseDate(LocalDate.of(2023, 1, 1));
         filmService.create(film2);
         filmService.addLike(film2.getId(), userId);
+
+        List<Film> popularFilms = filmService.getPopularFilms(limit);
+        assertThat(popularFilms).hasSize(expectedSize);
+        // или другие проверки — порядок, количество лайков и т. д.
+
     }
 }
