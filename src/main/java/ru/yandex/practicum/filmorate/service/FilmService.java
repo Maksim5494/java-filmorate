@@ -1,23 +1,35 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class FilmService {
-    private Map<Integer, Film> films = new HashMap<>(); // Карта, где ключ - ID фильма, а значение - объект фильма
+    private Map<Integer, Film> films = new HashMap<>(); // Карта, где ключ — ID фильма, а значение — объект фильма
 
     public void addLike(int filmId, int userId) {
-        if (!films.containsKey(filmId)) {
-            films.put(filmId, new Film(filmId));
+        Film film = films.get(filmId);
+        if (film == null) {
+            film = new Film(filmId, "", "", LocalDate.now(), 0); // Создаём фильм, если его нет
+            films.put(filmId, film);
         }
-        films.get(filmId).addLike(userId);
+        film.addLike(userId);
+    }
+
+    public Film addFilm(Film film) {
+        int newId = films.size() + 1; // Генерируем новый ID для фильма
+        film.setId(newId);
+        films.put(newId, film);
+        return film;
     }
 
     public void removeLike(int filmId, int userId) {
-        if (films.containsKey(filmId)) {
-            films.get(filmId).removeLike(userId);
+        Film film = films.get(filmId);
+        if (film != null) {
+            film.removeLike(userId);
         }
     }
 
@@ -27,24 +39,14 @@ public class FilmService {
         return sortedFilms.subList(0, Math.min(count, sortedFilms.size()));
     }
 
-    private static class Film {
-        private int id;
-        private Set<Integer> likes = new HashSet<>();
+    // Реализуем метод getFilmById
+    public Film getFilmById(int id) {
+        return films.get(id);
+    }
 
-        public Film(int id) {
-            this.id = id;
-        }
-
-        public void addLike(int userId) {
-            likes.add(userId);
-        }
-
-        public void removeLike(int userId) {
-            likes.remove(userId);
-        }
-
-        public int getLikesCount() {
-            return likes.size();
-        }
+    // Реализуем метод updateFilm
+    public void updateFilm(int id, Film updatedFilm) {
+        updatedFilm.setId(id); // Убеждаемся, что ID не изменился
+        films.put(id, updatedFilm);
     }
 }

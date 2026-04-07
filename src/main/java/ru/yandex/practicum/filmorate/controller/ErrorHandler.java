@@ -45,37 +45,3 @@ public class ErrorHandler {
         return Map.of("error", "Произошла непредвиденная ошибка.");
     }
 }
-
-    /*@ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(final NotFoundException e) {
-
-        return Map.of("error", e.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleThrowable(final Throwable e) {
-        if (log.isErrorEnabled()) {
-            log.error("Unhandled exception", e);
-        }
-        return Map.of("error", "Произошла непредвиденная ошибка.");
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleManualValidationException(final ValidationException e) {
-        return Map.of("error", e.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        return e.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        error -> error.getField(),
-                        error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Ошибка валидации",
-                        (existing, replacement) -> existing
-                ));
-    }
-}*/

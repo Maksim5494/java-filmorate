@@ -18,6 +18,7 @@ public class User {
     private String login;
 
     @NotEmpty(message = "Имя не должно быть пустым")
+    @Size(min = 2, max = 50, message = "Длина имени должна быть от 2 до 50 символов")
     private String name;
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
