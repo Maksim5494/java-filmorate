@@ -12,8 +12,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     private List<Film> films = new ArrayList<>();
 
     @Override
-    public void addFilm(Film film) {
+    public Film addFilm(Film film) {
         films.add(film);
+        return film; // возвращаем добавленный фильм
     }
 
     @Override
@@ -29,10 +30,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         for (int i = 0; i < films.size(); i++) {
             if (films.get(i).getId() == id) {
                 films.set(i, updatedFilm);
-                break;
+                return; // завершаем метод, если фильм найден и обновлен
             }
         }
+        throw new IllegalArgumentException("Фильм с ID " + id + " не найден"); // или другое исключение
     }
+
 
     @Override
     public List<Film> getAllFilms() {
