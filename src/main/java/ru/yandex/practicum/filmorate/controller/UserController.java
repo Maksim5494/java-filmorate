@@ -17,7 +17,28 @@ public class UserController {
     private final UserStorage userStorage;
 
     public UserController(UserStorage userStorage) {
+
         this.userStorage = userStorage;
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userStorage.addFriend(id, friendId);//добавление в друзья
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+        userStorage.removeFriend(id, friendId);//удаление из друзей
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<Integer> getFriends(@PathVariable int id) {
+        return userStorage.getFriends(id); //получение списка друзей
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<Integer> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userStorage.getCommonFriends(id, otherId); //получение списка общих друзей
     }
 
     @PostMapping
@@ -52,5 +73,6 @@ public class UserController {
         log.info("Получен запрос на список всех пользователей");
         return users;
     }
+
 }
 
