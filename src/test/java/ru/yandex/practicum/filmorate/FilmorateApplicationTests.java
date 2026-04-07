@@ -37,6 +37,7 @@ class FilmorateApplicationTests {
 	}
 
 	@Test void shouldThrowExceptionForNonexistentFilm() {
-		assertThrows(NotFoundException.class, () -> filmService.getById(-1L)); }
+		assertThrows(NotFoundException.class, () -> filmService.getById(-1L));
+	}
 
 }
