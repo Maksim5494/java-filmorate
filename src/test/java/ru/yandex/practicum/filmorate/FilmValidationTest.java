@@ -181,7 +181,7 @@ public class FilmValidationTest {
         filmService.addLike(addedFilm2.getId(), 103); // Один лайк второму фильму
 
         // 3. Получаем топ-фильмы
-        List<Film> topFilms = filmService.getTopFilms(2); // Передаём число фильмов в топе
+      //  List<Film> topFilms = filmService.getTopFilms(2); // Передаём число фильмов в топе
 
 
         // 4. Проверяем, что топ-список содержит фильмы в правильном порядке
@@ -214,6 +214,4 @@ public class FilmValidationTest {
         Film updatedFilm = filmService.getFilmById(addedFilm.getId());
         assertThat(updatedFilm.getLikes()).hasSize(2); // Должно быть 2 лайка
     }
-
-
 }

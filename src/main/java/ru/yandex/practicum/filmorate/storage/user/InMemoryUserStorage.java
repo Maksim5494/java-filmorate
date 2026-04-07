@@ -54,12 +54,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Integer> getFriends(int id) {
+    public List<User> getFriends(int id) {
         return List.of();
     }
 
     @Override
-    public List<Integer> getCommonFriends(int id, int otherId) {
+    public List<User> getCommonFriends(int id, int otherId) {
         return List.of();
     }
 }

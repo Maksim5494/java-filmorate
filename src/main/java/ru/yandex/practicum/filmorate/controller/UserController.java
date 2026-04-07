@@ -32,12 +32,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<Integer> getFriends(@PathVariable int id) {
+    public List<User> getFriends(@PathVariable int id) {
         return userStorage.getFriends(id); //получение списка друзей
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<Integer> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userStorage.getCommonFriends(id, otherId); //получение списка общих друзей
     }
 
