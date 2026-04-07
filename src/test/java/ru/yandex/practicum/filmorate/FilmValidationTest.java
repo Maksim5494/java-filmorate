@@ -104,39 +104,36 @@ public class FilmValidationTest {
     @Test
     void testRemoveLikeForNonExistingFilm() throws Exception {
         Long nonExistingFilmId = 999L;
-        Long userId = 1L;
+        Long userId = testUserId; // Используем существующего пользователя из setUp
 
-        try {
-            filmService.removeLike(nonExistingFilmId, userId);
-            fail("Ожидалось исключение NotFoundException, но его не было");
-        } catch (NotFoundException e) {
-            //System.out.println("Точное сообщение исключения: " + e.getMessage());
-            String expectedMessage = "Фильм с id " + nonExistingFilmId + " не найден";
-            assertThat(e.getMessage()).contains(expectedMessage);
-        }
+        NotFoundException e = assertThrows(NotFoundException.class, () ->
+                filmService.removeLike(nonExistingFilmId, userId)
+        );
+
+        // Исправлено: "id" в нижнем регистре, как в методе getById() сервиса
+        assertThat(e.getMessage()).contains("Фильм с id " + nonExistingFilmId + " не найден");
     }
 
     @Test
     void testRemoveLikeNotFound() throws Exception {
-        Film film = new Film("Тестовый фильм для проверки ошибки");
+        Film film = new Film("Фильм без лайков");
         film.setReleaseDate(LocalDate.now());
-        filmService.create(film);
-        Long filmId = film.getId();
-        Long nonExistingUserId = 999L;
+        film = filmService.create(film);
 
-        try {
-            filmService.removeLike(filmId, nonExistingUserId);
-            fail("Ожидалось исключение NotFoundException, но его не было");
-        } catch (NotFoundException e) {
-            String expectedMessage = "Пользователь с ID 999 не найден";
-            assertThat(e.getMessage()).contains(expectedMessage);
-           // assertThat(e.getMessage()).contains("Лайк от пользователя " + nonExistingUserId + " не найден");
-        }
+        // Пользователь существует (создан в setUp), но лайк не ставил
+        Long filmId = film.getId();
+
+        NotFoundException e = assertThrows(NotFoundException.class, () ->
+                filmService.removeLike(filmId, testUserId)
+        );
+
+        // Единый стандарт сообщения
+        String expectedMessage = "Лайк от пользователя " + testUserId + " не найден";
+        assertThat(e.getMessage()).contains(expectedMessage);
     }
 
     @Test
     void testGetPopularFilms() {
-        // Создаём несколько фильмов с разным количеством лайков
         Film film1 = new Film("Фильм 1");
         film1.setReleaseDate(LocalDate.now());
         filmService.create(film1);
@@ -145,32 +142,18 @@ public class FilmValidationTest {
         film2.setReleaseDate(LocalDate.of(2023, 1, 1));
         filmService.create(film2);
 
-        // Добавляем пользователя в систему
         User user1 = new User();
-        user1.setName("Пользователь 1");
-        userService.create(user1);
-        Long userId1 = user1.getId();
+        user1.setEmail("u1@yandex.ru");
+        user1.setLogin("u1");
+        user1.setBirthday(LocalDate.now());
+        user1 = userService.create(user1);
 
-        User user2 = new User();
-        user2.setName("Пользователь 2");
-        userService.create(user2);
-        Long userId2 = user2.getId();
+        filmService.addLike(film1.getId(), testUserId);
+        filmService.addLike(film2.getId(), user1.getId());
 
-        // Эмуляция лайков (2 для film1, 1 для film2, 0 для film3)
-        filmService.addLike(film1.getId(), userId1);
-        filmService.addLike(film1.getId(), userId2);
-
-        filmService.addLike(film2.getId(), userId1);
-
-
-        int limit = 5; // допустим, мы хотим получить топ-5 популярных фильмов
-        int expectedSize = 2; // ожидаем, что в топе будет 2 фильма (зависит от логики теста)
-
-
-        List<Film> popularFilms = filmService.getPopularFilms(limit);
-        assertThat(popularFilms).hasSize(expectedSize);
-        // или другие проверки — порядок, количество лайков и т. д.
-
+        List<Film> popularFilms = filmService.getPopularFilms(10);
+        // Проверяем, что вернулось именно 2 фильма (созданных в этом тесте)
+        assertThat(popularFilms).hasSize(2);
     }
 
     @Test

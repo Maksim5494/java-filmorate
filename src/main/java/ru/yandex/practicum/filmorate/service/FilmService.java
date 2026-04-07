@@ -38,11 +38,11 @@ public class FilmService {
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Film film = getById(filmId); // Если фильм не найден — уже кинет NotFoundException
+        Film film = getById(filmId); // Бросит NotFoundException "Фильм с id ... не найден"
 
-        User user = userStorage.findUserById(userId);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с ID " + userId + " не найден");
+        // Проверяем существование пользователя через storage или service
+        if (userStorage.findUserById(userId) == null) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
         if (!film.getLikes().contains(userId)) {
@@ -50,6 +50,7 @@ public class FilmService {
         }
 
         film.getLikes().remove(userId);
+        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
 
