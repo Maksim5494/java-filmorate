@@ -4,58 +4,53 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int counter = 1;
+
+    private final UserStorage userStorage;
+
+    public UserController(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        validate(user);
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        user.setId(counter++);
-        users.put(user.getId(), user);
+        userStorage.addUser(user);
         log.info("Пользователь успешно добавлен: {}", user);
         return user;
     }
 
-    @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            log.error("Пользователь с ID {} не найден", user.getId());
-            throw new NotFoundException("Пользователь с таким ID не существует");
+    @PutMapping("/{id}")
+    public User updateUser(@PathVariable int id, @Valid @RequestBody User user) {
+        User updatedUser = userStorage.updateUser(id, user);
+        if (updatedUser == null) {
+            throw new NotFoundException("Пользователь с таким ID не найден");
         }
-        validate(user);
-        users.put(user.getId(), user);
-        log.info("Пользователь с ID {} успешно обновлен", user.getId());
+        log.info("Пользователь с ID {} успешно обновлен", id);
+        return updatedUser;
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable int id) {
+        User user = userStorage.getUserById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с таким ID не найден");
+        }
         return user;
     }
 
     @GetMapping
     public List<User> getAllUsers() {
+        List<User> users = userStorage.getAllUsers();
         log.info("Получен запрос на список всех пользователей");
-        return new ArrayList<>(users.values());
-    }
-
-    private void validate(User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта некорректна");
-        }
-        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может быть пустым или содержать пробелы");
-        }
+        return users;
     }
 }
 
