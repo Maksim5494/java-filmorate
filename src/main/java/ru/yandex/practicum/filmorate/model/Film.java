@@ -47,7 +47,12 @@ public class Film {
         likes.remove(userId);
     }
 
+    public Set<Integer> getLikes() {
+        return likes; // или ваша текущая реализация
+    }
+
     public int getLikesCount() {
         return likes.size();
     }
+
 }

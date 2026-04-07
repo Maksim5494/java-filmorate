@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -34,9 +35,11 @@ public class FilmService {
     }
 
     public List<Film> getTopFilms(int count) {
-        List<Film> sortedFilms = new ArrayList<>(films.values());
-        sortedFilms.sort((f1, f2) -> f2.getLikesCount() - f1.getLikesCount());
-        return sortedFilms.subList(0, Math.min(count, sortedFilms.size()));
+        return films.values()
+                .stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed()) // Сортируем по количеству лайков
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     // Реализуем метод getFilmById
@@ -48,5 +51,17 @@ public class FilmService {
     public void updateFilm(int id, Film updatedFilm) {
         updatedFilm.setId(id); // Убеждаемся, что ID не изменился
         films.put(id, updatedFilm);
+    }
+
+    public List<Film> getAllFilms() {
+        return new ArrayList<>(films.values());
+    }
+
+    public void clearFilms() {
+        films.clear();
+    }
+
+    public List<Film> getTopFilms() {
+        return List.of();
     }
 }

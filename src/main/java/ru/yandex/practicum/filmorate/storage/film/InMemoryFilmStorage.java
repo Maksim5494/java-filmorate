@@ -56,4 +56,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getTopFilms(int count) {
         return List.of();
     }
+
+    @Override
+    public void clearFilms() {
+
+    }
 }
