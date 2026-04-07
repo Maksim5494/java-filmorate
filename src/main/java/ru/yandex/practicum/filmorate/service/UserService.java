@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -87,11 +86,6 @@ public class UserService {
         return userStorage.modifyUser(user);
     }
 
-    public Set<Film> getFavoriteFilms(Long userId) {
-        User user = getUserOrThrow(userId);
-        return user.getFavoriteFilms(); // Возвращаем реальную коллекцию
-    }
-
     public void removeUser(Long userId) {
         User user = userStorage.findUserById(userId);
 
@@ -101,36 +95,7 @@ public class UserService {
 
         userStorage.removeUser(userId);  // предполагаемый метод удаления из хранилища
         log.info("Пользователь с ID {} удалён", userId);
-    }
 
-    public AddToFavoritesResult addToFavorites(Long userId, Long filmId) {
-        User user = getUserOrThrow(userId);
-        Film film = filmStorage.findFilmById(filmId);
-
-        // Если фильм не найден — возвращаем соответствующий статус
-        if (film == null) {
-            return new AddToFavoritesResult(
-                    false,
-                    "Фильм с ID " + filmId + " не найден"
-            );
-        }
-
-        // Проверяем, есть ли фильм уже в избранном
-        if (user.getFavoriteFilms().contains(film)) {
-            log.info("Пользователь {} уже добавил фильм {} в избранное", userId, film.getTitle());
-            return new AddToFavoritesResult(
-                    false,
-                    "Фильм уже добавлен в избранное"
-            );
-        } else {
-            user.getFavoriteFilms().add(film);
-            log.info("Фильм {} добавлен в избранное пользователем {}", film.getTitle(), userId);
-            userStorage.modifyUser(user);
-            return new AddToFavoritesResult(
-                    true,
-                    "Успешное добавление в избранное"
-            );
         }
     }
-}
 
