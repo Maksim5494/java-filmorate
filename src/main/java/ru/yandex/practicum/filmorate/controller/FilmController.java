@@ -26,7 +26,7 @@ public class FilmController {
         return filmService.addFilm(film);
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
         // Проверка согласованности ID
         Integer filmIdFromBody = film.getId();
