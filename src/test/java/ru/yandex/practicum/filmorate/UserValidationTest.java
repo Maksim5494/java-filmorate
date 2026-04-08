@@ -75,4 +75,70 @@ class UserValidationTest {
         user.setBirthday(LocalDate.now().minusYears(20));
         return userService.addUser(user);
     }
+
+    @Test
+    void shouldSetLoginAsNameIfNameIsBlank() {
+        User user = new User();
+        user.setLogin("common_login");
+        user.setEmail("test@mail.ru");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        user.setName(""); // Пустое имя
+
+        User savedUser = userService.addUser(user);
+
+        assertThat(savedUser.getName())
+                .as("Если имя пустое, должен использоваться логин")
+                .isEqualTo("common_login");
+    }
+
+    @Test
+    void shouldFailValidationWhenLoginHasSpaces() {
+        User user = new User();
+        user.setLogin("login with spaces"); // Пробел в логине
+        user.setEmail("test@mail.ru");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+
+        assertThat(violations).anyMatch(v -> v.getMessage().contains("Логин не может содержать пробелы"));
+    }
+
+    @Test
+    void shouldFailValidationWhenBirthdayInFuture() {
+        User user = new User();
+        user.setLogin("login");
+        user.setEmail("test@mail.ru");
+        user.setBirthday(LocalDate.now().plusDays(1)); // Будущая дата
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+
+        assertThat(violations).anyMatch(v -> v.getMessage().contains("Дата рождения не может быть в будущем"));
+    }
+
+    @Test
+    void shouldPassValidationWhenBirthdayIsToday() {
+        User user = new User();
+        user.setLogin("login");
+        user.setEmail("test@mail.ru");
+        user.setBirthday(LocalDate.now()); // Сегодня — это валидно (PastOrPresent)
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+
+        assertThat(violations).isEmpty();
+    }
+
+    @Test
+    void testAddAndRemoveFriend() {
+        User u1 = createTestUser("User1", "u1@test.com");
+        User u2 = createTestUser("User2", "u2@test.com");
+
+        userService.addFriend(u1.getId(), u2.getId());
+
+        assertThat(userService.getFriends(u1.getId())).hasSize(1);
+        assertThat(userService.getFriends(u2.getId())).hasSize(1); // Взаимность дружбы
+
+        userService.removeFriend(u1.getId(), u2.getId());
+
+        assertThat(userService.getFriends(u1.getId())).isEmpty();
+    }
 }
