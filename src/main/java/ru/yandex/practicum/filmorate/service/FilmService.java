@@ -54,8 +54,8 @@ public class FilmService {
         filmStorage.clearFilms();
     }
 
-    private void validate(Film film) {
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+    public void validate(Film film) {
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }

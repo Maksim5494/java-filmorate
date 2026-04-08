@@ -20,8 +20,6 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов")
     private String description;
 
-    // @FutureOrPresent удален, так как фильмы вышли в прошлом.
-    // Валидацию на 1895 год лучше делать в сервисе или через кастомную аннотацию.
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")

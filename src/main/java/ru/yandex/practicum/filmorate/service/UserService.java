@@ -76,4 +76,16 @@ public class UserService {
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
+
+    public void deleteFriend(Integer id, Integer friendId) {
+        User user = userStorage.getUserById(id);
+        User friend = userStorage.getUserById(friendId);
+
+        if (user != null && friend != null) {
+            user.getFriends().remove(friendId);
+            friend.getFriends().remove(id); // Удаляем взаимно
+        } else {
+            throw new NotFoundException("Пользователь не найден");
+        }
+    }
 }

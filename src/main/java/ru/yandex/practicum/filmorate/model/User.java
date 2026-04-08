@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Data
 public class User {
@@ -27,4 +28,8 @@ public class User {
 
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
+
+    public Collection<Object> getFriends() {
+        return java.util.List.of();
+    }
 }
