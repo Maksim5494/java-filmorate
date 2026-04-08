@@ -55,8 +55,13 @@ public class FilmService {
     }
 
     public void validate(Film film) {
+        if (film.getReleaseDate() == null) {
+            // Здесь можно добавить обработку случая, когда дата релиза не задана
+            throw new ValidationException("Дата релиза не может быть пустой");
+        }
         if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }
+
 }

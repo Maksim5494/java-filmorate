@@ -202,6 +202,7 @@ public class FilmValidationTest {
     @Test
     public void testAddLikeIncreasesLikesCount() {
         Film film = new Film();
+        film.setReleaseDate(LocalDate.of(2023, 1, 1)); // Устанавливаем дату релиза
         Film addedFilm = filmService.addFilm(film);
 
         filmService.addLike(addedFilm.getId(), 101);
@@ -210,4 +211,5 @@ public class FilmValidationTest {
         Film updatedFilm = filmService.getFilmById(addedFilm.getId());
         assertThat(updatedFilm.getLikes()).hasSize(2); // Должно быть 2 лайка
     }
+
 }
