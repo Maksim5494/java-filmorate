@@ -26,7 +26,7 @@ public class FilmController {
         return filmService.addFilm(film);
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
         // Проверка согласованности ID
         Integer filmIdFromBody = film.getId();
@@ -56,7 +56,7 @@ public class FilmController {
         return film;
     }
 
-    @PostMapping("/{filmId}/like/{userId}")
+    @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         filmService.addLike(filmId, userId);
     }
