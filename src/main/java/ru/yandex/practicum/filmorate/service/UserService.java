@@ -1,58 +1,72 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    private Map<Integer, Set<Integer>> friendships = new HashMap<>(); // Карта, где ключ - ID пользователя, а значение - множество ID друзей
-    private Map<Integer, User> users = new HashMap<>();
+    private final UserStorage userStorage;
+    private final Map<Integer, Set<Integer>> friendships = new HashMap<>();
+
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     public void addFriend(int userId, int friendId) {
-        if (!friendships.containsKey(userId)) {
-            friendships.put(userId, new HashSet<>());
-        }
-        friendships.get(userId).add(friendId);
+        User user = getUserById(userId);
+        User friend = getUserById(friendId);
 
-        if (!friendships.containsKey(friendId)) {
-            friendships.put(friendId, new HashSet<>());
-        }
-        friendships.get(friendId).add(userId);
+        friendships.computeIfAbsent(userId, k -> new HashSet<>()).add(friendId);
+        friendships.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
     }
 
     public void removeFriend(int userId, int friendId) {
-        if (friendships.containsKey(userId)) {
-            friendships.get(userId).remove(friendId);
-        }
-        if (friendships.containsKey(friendId)) {
-            friendships.get(friendId).remove(userId);
-        }
-    }
-
-    public Set<Integer> getCommonFriends(int userId1, int userId2) {
-        Set<Integer> commonFriends = new HashSet<>(friendships.getOrDefault(userId1, new HashSet<>()));
-        commonFriends.retainAll(friendships.getOrDefault(userId2, new HashSet<>()));
-        return commonFriends;
-    }
-
-    public User addUser(User user) {
-        int userId = user.getId();
-        users.put(userId, user);
-        return user;
-    }
-
-    public User getUserById(Integer id) {
-        return users.get(id); // Возвращает User по ID или null, если пользователя нет
+        if (friendships.containsKey(userId)) friendships.get(userId).remove(friendId);
+        if (friendships.containsKey(friendId)) friendships.get(friendId).remove(userId);
     }
 
     public List<User> getFriends(int userId) {
-        Set<Integer> friendIds = friendships.getOrDefault(userId, new HashSet<>());
-        return friendIds.stream()
-                .map(this::getUserById)
+        getUserById(userId); // Проверка на существование
+        return friendships.getOrDefault(userId, new HashSet<>()).stream()
+                .map(userStorage::getUserById)
                 .collect(Collectors.toList());
     }
-}
 
+    public List<User> getCommonFriends(int userId1, int userId2) {
+        Set<Integer> user1Friends = friendships.getOrDefault(userId1, new HashSet<>());
+        Set<Integer> user2Friends = friendships.getOrDefault(userId2, new HashSet<>());
+
+        return user1Friends.stream()
+                .filter(user2Friends::contains)
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList());
+    }
+
+    public User addUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        return userStorage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        return userStorage.updateUser(user.getId(), user);
+    }
+
+    public User getUserById(int id) {
+        User user = userStorage.getUserById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь " + id + " не найден");
+        }
+        return user;
+    }
+
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
+}

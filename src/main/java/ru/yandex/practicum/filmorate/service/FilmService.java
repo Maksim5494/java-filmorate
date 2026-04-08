@@ -1,67 +1,58 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class FilmService {
-    private Map<Integer, Film> films = new HashMap<>(); // Карта, где ключ — ID фильма, а значение — объект фильма
+    private final FilmStorage filmStorage;
+    private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
-    public void addLike(int filmId, int userId) {
-        Film film = films.get(filmId);
-        if (film == null) {
-            film = new Film(filmId, "", "", LocalDate.now(), 0); // Создаём фильм, если его нет
-            films.put(filmId, film);
-        }
-        film.addLike(userId);
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     public Film addFilm(Film film) {
-        int newId = films.size() + 1; // Генерируем новый ID для фильма
-        film.setId(newId);
-        films.put(newId, film);
-        return film;
+        validate(film);
+        return filmStorage.addFilm(film);
     }
 
-    public void removeLike(int filmId, int userId) {
-        Film film = films.get(filmId);
-        if (film != null) {
-            film.removeLike(userId);
-        }
+    public void updateFilm(int id, Film film) {
+        validate(film);
+        filmStorage.updateFilm(id, film);
     }
 
-    public List<Film> getTopFilms(int count) {
-        return films.values()
-                .stream()
-                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed()) // Сортируем по количеству лайков
-                .limit(count)
-                .collect(Collectors.toList());
-    }
-
-    // Реализуем метод getFilmById
     public Film getFilmById(int id) {
-        return films.get(id);
-    }
-
-    // Реализуем метод updateFilm
-    public void updateFilm(int id, Film updatedFilm) {
-        updatedFilm.setId(id); // Убеждаемся, что ID не изменился
-        films.put(id, updatedFilm);
+        return filmStorage.getFilmById(id);
     }
 
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        return filmStorage.getAllFilms();
+    }
+
+    public void addLike(int filmId, int userId) {
+        filmStorage.addLike(filmId, userId);
+    }
+
+    public void removeLike(int filmId, int userId) {
+        filmStorage.removeLike(filmId, userId);
+    }
+
+    public List<Film> getTopFilms(int count) {
+        return filmStorage.getTopFilms(count);
     }
 
     public void clearFilms() {
-        films.clear();
+        filmStorage.clearFilms();
     }
 
-    public List<Film> getTopFilms() {
-        return List.of();
+    private void validate(Film film) {
+        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
     }
 }

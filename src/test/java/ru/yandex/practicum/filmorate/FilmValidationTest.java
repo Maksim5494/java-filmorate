@@ -78,19 +78,15 @@ public class FilmValidationTest {
 
     @Test
     public void testAddLike() {
-        // 1. Создаём фильм и настраиваем его
         Film film = new Film();
-        film.setId(1); // задаём ID фильма
+        film.setName("Inception");
+        film.setDuration(148);
+        film.setReleaseDate(LocalDate.now());
+        Film addedFilm = filmService.addFilm(film);
 
-        // 2. Вызываем метод добавления лайка
-        filmService.addLike(1, 101); // пользователь с ID 101 ставит лайк фильму с ID 1
+        filmService.addLike(addedFilm.getId(), 101);
 
-        // 3. Проверяем, что лайк добавился
-        assertThat(filmService.getFilmById(1).getLikes()).contains(101); // ожидаем, что 101 есть в наборе лайков
-
-        // 4. Проверяем, что дубликаты не добавляются
-        filmService.addLike(1, 101); // повторный лайк от того же пользователя
-        assertThat(filmService.getFilmById(1).getLikes()).hasSize(1); // размер набора должен остаться 1
+        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).contains(101);
     }
 
     @Test

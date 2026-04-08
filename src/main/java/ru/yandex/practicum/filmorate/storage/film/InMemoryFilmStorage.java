@@ -2,63 +2,60 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-
-    private List<Film> films = new ArrayList<>();
+    private final Map<Integer, Film> films = new HashMap<>();
+    private int idCounter = 0;
 
     @Override
     public Film addFilm(Film film) {
-        films.add(film);
-        return film; // возвращаем добавленный фильм
+        film.setId(++idCounter);
+        films.put(film.getId(), film);
+        return film;
     }
 
     @Override
     public Film getFilmById(int id) {
-        return films.stream()
-                .filter(film -> film.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return films.get(id);
     }
 
     @Override
     public void updateFilm(int id, Film updatedFilm) {
-        for (int i = 0; i < films.size(); i++) {
-            if (films.get(i).getId() == id) {
-                films.set(i, updatedFilm);
-                return; // завершаем метод, если фильм найден и обновлен
-            }
-        }
-        throw new IllegalArgumentException("Фильм с ID " + id + " не найден"); // или другое исключение
+        updatedFilm.setId(id);
+        films.put(id, updatedFilm);
     }
-
 
     @Override
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films);
+        return new ArrayList<>(films.values());
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-
+        Film film = films.get(filmId);
+        if (film != null) film.getLikes().add(userId);
     }
 
     @Override
     public void removeLike(int filmId, int userId) {
-
+        Film film = films.get(filmId);
+        if (film != null) film.getLikes().remove(userId);
     }
 
     @Override
     public List<Film> getTopFilms(int count) {
-        return List.of();
+        return films.values().stream()
+                .sorted((f1, f2) -> Integer.compare(f2.getLikesCount(), f1.getLikesCount()))
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void clearFilms() {
-
+        films.clear();
+        idCounter = 0;
     }
 }

@@ -2,26 +2,16 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Film {
-
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
-
     private int id;
 
     @NotBlank(message = "Название не может быть пустым")
@@ -30,29 +20,25 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов")
     private String description;
 
-    @FutureOrPresent(message = "Дата релиза не может быть в прошлом")
+    // @FutureOrPresent удален, так как фильмы вышли в прошлом.
+    // Валидацию на 1895 год лучше делать в сервисе или через кастомную аннотацию.
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
 
-    // Добавляем поле для хранения лайков
     private Set<Integer> likes = new HashSet<>();
 
-    public void addLike(int userId) {
-        likes.add(userId);
-    }
-
-    public void removeLike(int userId) {
-        likes.remove(userId);
-    }
-
-    public Set<Integer> getLikes() {
-        return likes; // или ваша текущая реализация
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likes = new HashSet<>();
     }
 
     public int getLikesCount() {
         return likes.size();
     }
-
 }
