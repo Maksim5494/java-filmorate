@@ -14,11 +14,11 @@ import java.util.List;
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;  // Добавлено для проверки пользователей
+    private final UserStorage userStorage;
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {  // Добавлен UserStorage
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -29,13 +29,9 @@ public class FilmService {
     }
 
     public Film updateFilm(int id, Film updatedFilm) {
-        // Сначала проверяем существование фильма
         if (!filmStorage.exists(id)) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
-
-        // Затем устанавливаем ID и обновляем
-        updatedFilm.setId(id);
         validate(updatedFilm);
         filmStorage.updateFilm(id, updatedFilm);
         return filmStorage.getFilmById(id);
@@ -54,30 +50,19 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        // Проверяем существование фильма
         if (!filmStorage.exists(filmId)) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
-
-        // Проверяем существование пользователя
         if (!userStorage.exists(userId)) {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
-
         filmStorage.addLike(filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
-        // Проверяем существование фильма
         if (!filmStorage.exists(filmId)) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
-
-        // Проверяем существование пользователя
-        if (!userStorage.exists(userId)) {
-            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
-        }
-
         filmStorage.removeLike(filmId, userId);
     }
 
@@ -89,9 +74,9 @@ public class FilmService {
         filmStorage.clearFilms();
     }
 
-    public void validate(Film film) {
+    private void validate(Film film) {
         if (film.getReleaseDate() != null &&
-                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+                film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }

@@ -28,17 +28,8 @@ public class FilmController {
 
     @PutMapping("/{id}")
     public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
-        // Проверка согласованности ID
-        Integer filmIdFromBody = film.getId();
-        if (filmIdFromBody != null && filmIdFromBody != id) {
-            throw new ValidationException("ID в пути (" + id + ") не совпадает с ID в теле (" + filmIdFromBody + ")");
-        }
-
-        // Устанавливаем ID из пути, если в теле не указан
-        if (filmIdFromBody == null) {
-            film.setId(id);
-        }
-
+        // Игнорируем ID из тела запроса и используем только ID из пути
+        film.setId(id);
         return filmService.updateFilm(id, film);
     }
 
@@ -49,11 +40,7 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable int id) {
-        Film film = filmService.getFilmById(id);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id=" + id + " не найден");
-        }
-        return film;
+        return filmService.getFilmById(id);
     }
 
     @PutMapping("/{filmId}/like/{userId}")
@@ -62,7 +49,7 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void removeLike(@PathVariable int filmId, @PathVariable int userId) {  // Изменено с Long на int
+    public void removeLike(@PathVariable int filmId, @PathVariable int userId) {
         filmService.removeLike(filmId, userId);
     }
 
