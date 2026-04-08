@@ -27,7 +27,7 @@ public class FilmController {
     }
 
     @PutMapping("/{id}")
-    public Film update(@PathVariable int id, @Valid @RequestBody Film film) {
+    public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
         // Проверка согласованности ID
         Integer filmIdFromBody = film.getId();
         if (filmIdFromBody != null && filmIdFromBody != id) {

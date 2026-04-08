@@ -10,7 +10,7 @@ public interface FilmStorage {
 
     Film getFilmById(int id);
 
-    void updateFilm(int id, Film updatedFilm);
+    void updateFilm(int id, Film film);
 
     List<Film> getAllFilms();
 

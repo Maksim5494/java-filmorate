@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -70,10 +71,10 @@ public class FilmValidationTest {
         updatedFilm.setReleaseDate(LocalDate.of(2001, 1, 1));
         updatedFilm.setDuration(150);
 
-       // Film result = filmService.updateFilm(filmId, updatedFilm);
+        Film result = filmService.updateFilm(filmId, updatedFilm);
 
-        //assertEquals("Обновленное название", result.getName());
-        //assertEquals("Обновленное описание", result.getDescription());
+        assertEquals("Обновленное название", result.getName());
+        assertEquals("Обновленное описание", result.getDescription());
     }
 
     @Test
