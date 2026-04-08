@@ -18,8 +18,8 @@ public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(ValidationException ex) {
-        return Map.of("error", ex.getMessage());
+    public Map<String, String> handleValidation(ValidationException e) {
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
