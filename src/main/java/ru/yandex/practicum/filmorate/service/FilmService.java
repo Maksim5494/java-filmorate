@@ -60,6 +60,9 @@ public class FilmService {
     }
 
     public void removeLike(int filmId, int userId) {
+        if (!userStorage.exists(userId)) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
         if (!filmStorage.exists(filmId)) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
