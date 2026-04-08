@@ -36,6 +36,7 @@ public class UserService {
 
         userStorage.deleteFriend(userId, friendId);
     }
+
     public List<User> getFriends(int userId) {
         getUserById(userId); // Проверка на существование
         return friendships.getOrDefault(userId, new HashSet<>()).stream()
