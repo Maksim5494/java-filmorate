@@ -120,7 +120,7 @@ class UserValidationTest {
         User user = new User();
         user.setLogin("login");
         user.setEmail("test@mail.ru");
-        user.setBirthday(LocalDate.now()); // Сегодня — это валидно (PastOrPresent)
+        user.setBirthday(LocalDate.now());
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
@@ -135,7 +135,7 @@ class UserValidationTest {
         userService.addFriend(u1.getId(), u2.getId());
 
         assertThat(userService.getFriends(u1.getId())).hasSize(1);
-        assertThat(userService.getFriends(u2.getId())).hasSize(1); // Взаимность дружбы
+        assertThat(userService.getFriends(u2.getId())).hasSize(1);
 
         userService.removeFriend(u1.getId(), u2.getId());
 

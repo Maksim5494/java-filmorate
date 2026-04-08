@@ -37,7 +37,7 @@ public class FilmValidationTest {
     @BeforeEach
     void setUp() {
         filmService.clearFilms();
-        userStorage.clearUsers(); // Убедитесь, что в UserStorage есть этот метод
+        userStorage.clearUsers();
     }
 
     private int createTestUser(String email) {
@@ -101,11 +101,9 @@ public class FilmValidationTest {
         int u2 = createTestUser("2@t.com");
         int u3 = createTestUser("3@t.com");
 
-        // У первого фильма 2 лайка
         filmService.addLike(addedFilm1.getId(), u1);
         filmService.addLike(addedFilm1.getId(), u2);
 
-        // У второго фильма 1 лайк
         filmService.addLike(addedFilm2.getId(), u3);
 
         List<Film> topFilms = filmService.getTopFilms(10);
