@@ -63,6 +63,9 @@ public class FilmService {
         if (!filmStorage.exists(filmId)) {
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
+        if (!userStorage.exists(userId)) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
         filmStorage.removeLike(filmId, userId);
     }
 
