@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidation(final ValidationException e) {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(final NotFoundException e) {
         return Map.of("error", e.getMessage());
@@ -43,5 +43,11 @@ public class ErrorHandler {
     public Map<String, String> handleException(Exception ex) {
         log.error("Произошла непредвиденная ошибка: ", ex);
         return Map.of("error", "Произошла непредвиденная ошибка.");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleThrowable(final Throwable e) {
+        return Map.of("error", "Произошла непредвиденная ошибка: " + e.getMessage());
     }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -26,9 +27,19 @@ public class FilmController {
     }
 
     @PutMapping("/{id}")
-    public Film update(@PathVariable Long id, @Valid @RequestBody Film film) {
-        filmService.updateFilm(id.intValue(), film);
-        return film;
+    public Film update(@PathVariable int id, @Valid @RequestBody Film film) {
+        // Проверка согласованности ID
+        Integer filmIdFromBody = film.getId();
+        if (filmIdFromBody != null && filmIdFromBody != id) {
+            throw new ValidationException("ID в пути (" + id + ") не совпадает с ID в теле (" + filmIdFromBody + ")");
+        }
+
+        // Устанавливаем ID из пути, если в теле не указан
+        if (filmIdFromBody == null) {
+            film.setId(id);
+        }
+
+        return filmService.updateFilm(id, film);
     }
 
     @GetMapping
@@ -37,8 +48,8 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Long id) {
-        Film film = filmService.getFilmById(id.intValue());
+    public Film getFilmById(@PathVariable int id) {  // ← int вместо Long
+        Film film = filmService.getFilmById(id);
         if (film == null) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
@@ -46,8 +57,8 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {  // ← Long
-        filmService.addLike(filmId.intValue(), userId.intValue());
+    public void addLike(@PathVariable int filmId, @PathVariable int userId) {  // ← int вместо Long
+        filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")

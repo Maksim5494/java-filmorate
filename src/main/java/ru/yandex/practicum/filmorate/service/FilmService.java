@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -13,6 +14,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
+    @Autowired
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
@@ -22,9 +24,15 @@ public class FilmService {
         return filmStorage.addFilm(film);
     }
 
-    public void updateFilm(int id, Film film) {
-        validate(film);
-        filmStorage.updateFilm(id, film);
+    public Film updateFilm(int id, Film film) {
+        // Проверка существования фильма
+        Film updatedFilm = filmStorage.update(film);
+
+        if (updatedFilm == null) {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
+        }
+
+        return updatedFilm;
     }
 
     public Film getFilmById(int id) {
@@ -55,10 +63,8 @@ public class FilmService {
     }
 
     public void validate(Film film) {
-        if (film.getReleaseDate() == null) {
-            throw new ValidationException("Дата релиза не может быть пустой");
-        }
-        if (film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+        if (film.getReleaseDate() != null &&
+                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }
