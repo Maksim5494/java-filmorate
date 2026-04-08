@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
 
-
 @RestController
 @Slf4j
 @RequestMapping("/films")
@@ -29,10 +28,13 @@ public class FilmController {
     }
 
     @PutMapping("/{id}")
-    public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
-        filmStorage.updateFilm(id, film);
-        log.info("Фильм с ID {} успешно обновлен", film.getId());
-        return film;
+    public Film update(@PathVariable Long id, @Valid @RequestBody Film film) {
+        film.setId((int) (long) id);
+
+        if (!filmStorage.exists(id.intValue())) {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
+        }
+        return filmStorage.update(film);
     }
 
     @GetMapping
@@ -42,22 +44,22 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable int id) {
-        Film film = filmStorage.getFilmById(id);
+    public Film getFilmById(@PathVariable Long id) {
+        Film film = filmStorage.getFilmById(id.intValue());
         if (film == null) {
-            throw new NotFoundException("Фильм с таким ID не найден");
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
         return film;
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public void addLike(@PathVariable int filmId, @PathVariable int userId) {
-        filmStorage.addLike(filmId, userId); //лайк фильму
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {  // ← Long
+        filmStorage.addLike(filmId.intValue(), userId.intValue());
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void removeLike(@PathVariable int filmId, @PathVariable int userId) {
-        filmStorage.removeLike(filmId, userId); //удаление лайка фильму
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {  // ← Long
+        filmStorage.removeLike(filmId.intValue(), userId.intValue());
     }
 
     @GetMapping("/popular")

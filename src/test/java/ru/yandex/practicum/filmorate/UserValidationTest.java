@@ -23,12 +23,12 @@ class UserValidationTest {
     private Validator validator;
 
     @Autowired
-    private UserController userService; // На самом деле это контроллер, лучше переименовать в userController
+    private UserController userService;
 
     @Test
     void testUserValidation() {
         User user = new User();
-        user.setLogin(" "); // Невалидный логин (пробел)
+        user.setLogin(" ");
         user.setEmail("invalid_email");
         user.setName("Jo");
 
@@ -46,7 +46,7 @@ class UserValidationTest {
         User addedUser = userService.addUser(user);
 
         addedUser.setEmail("new.jane.doe@example.com");
-        userService.updateUser(addedUser); // Передаем объект с ID внутри
+        userService.updateUser(addedUser);
 
         User updatedUser = userService.getUserById(addedUser.getId());
         assertThat(updatedUser.getEmail()).isEqualTo("new.jane.doe@example.com");

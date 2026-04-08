@@ -58,4 +58,14 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.clear();
         idCounter = 0;
     }
+
+    @Override
+    public Film update(Film film) {
+        return null;
+    }
+
+    @Override
+    public boolean exists(int id) {
+        return false;
+    }
 }

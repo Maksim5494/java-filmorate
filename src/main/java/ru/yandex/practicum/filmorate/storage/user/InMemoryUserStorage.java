@@ -4,15 +4,14 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Integer, Set<Integer>> friendships = new HashMap<>();
     private int counter = 1;
 
     @Override
@@ -37,7 +36,6 @@ public class InMemoryUserStorage implements UserStorage {
         return updatedUser;
     }
 
-
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
@@ -45,26 +43,57 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
+        if (!users.containsKey(id) || !users.containsKey(friendId)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
 
+        friendships.computeIfAbsent(id, k -> new HashSet<>()).add(friendId);
+        friendships.computeIfAbsent(friendId, k -> new HashSet<>()).add(id);
     }
 
     @Override
     public void removeFriend(int id, int friendId) {
+        if (!users.containsKey(id) || !users.containsKey(friendId)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
 
+        friendships.getOrDefault(id, new HashSet<>()).remove(friendId);
+        friendships.getOrDefault(friendId, new HashSet<>()).remove(id);
     }
 
     @Override
     public List<User> getFriends(int id) {
-        return List.of();
+        if (!users.containsKey(id)) {
+            throw new NotFoundException("Пользователь с ID " + id + " не найден");
+        }
+
+        Set<Integer> friendIds = friendships.getOrDefault(id, new HashSet<>());
+        return friendIds.stream()
+                .map(this::getUserById)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<User> getCommonFriends(int id, int otherId) {
-        return List.of();
+    public List<User> getCommonFriends(int id1, int id2) {
+        if (!users.containsKey(id1) || !users.containsKey(id2)) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        Set<Integer> friends1 = friendships.getOrDefault(id1, new HashSet<>());
+        Set<Integer> friends2 = friendships.getOrDefault(id2, new HashSet<>());
+
+        Set<Integer> commonIds = new HashSet<>(friends1);
+        commonIds.retainAll(friends2);
+
+        return commonIds.stream()
+                .map(this::getUserById)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-
+        removeFriend(userId, friendId);
     }
 }
