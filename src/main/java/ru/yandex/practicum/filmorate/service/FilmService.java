@@ -24,15 +24,15 @@ public class FilmService {
         return filmStorage.addFilm(film);
     }
 
-    public Film updateFilm(int id, Film film) {
-        // Проверка существования фильма
-        Film updatedFilm = filmStorage.update(film);
-
-        if (updatedFilm == null) {
+    public Film updateFilm(int id, Film updatedFilm) {
+        if (!filmStorage.exists(id)) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
 
-        return updatedFilm;
+        updatedFilm.setId(id);
+        filmStorage.updateFilm(id, updatedFilm);
+
+        return filmStorage.getFilmById(id);
     }
 
     public Film getFilmById(int id) {

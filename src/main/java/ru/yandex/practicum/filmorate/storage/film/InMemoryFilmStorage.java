@@ -60,11 +60,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
-        return null;
-    }
-
-    @Override
     public boolean exists(int id) {
         return false;
     }
