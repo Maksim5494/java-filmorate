@@ -6,17 +6,21 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;  // Добавлено для проверки пользователей
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {  // Добавлен UserStorage
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public Film addFilm(Film film) {
@@ -25,17 +29,24 @@ public class FilmService {
     }
 
     public Film updateFilm(int id, Film updatedFilm) {
-        updatedFilm.setId(id);
+        // Сначала проверяем существование фильма
         if (!filmStorage.exists(id)) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
 
+        // Затем устанавливаем ID и обновляем
+        updatedFilm.setId(id);
+        validate(updatedFilm);
         filmStorage.updateFilm(id, updatedFilm);
         return filmStorage.getFilmById(id);
     }
 
     public Film getFilmById(int id) {
-        return filmStorage.getFilmById(id);
+        Film film = filmStorage.getFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
+        }
+        return film;
     }
 
     public List<Film> getAllFilms() {
@@ -43,13 +54,30 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        if (filmStorage.getFilmById(filmId) == null) {
-            throw new NotFoundException("Фильм не найден");
+        // Проверяем существование фильма
+        if (!filmStorage.exists(filmId)) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
+
+        // Проверяем существование пользователя
+        if (!userStorage.exists(userId)) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+
         filmStorage.addLike(filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
+        // Проверяем существование фильма
+        if (!filmStorage.exists(filmId)) {
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+
+        // Проверяем существование пользователя
+        if (!userStorage.exists(userId)) {
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+
         filmStorage.removeLike(filmId, userId);
     }
 
@@ -67,5 +95,4 @@ public class FilmService {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
     }
-
 }

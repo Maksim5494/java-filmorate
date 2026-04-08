@@ -93,6 +93,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public boolean exists(int id) {
+        return users.containsKey(id);
+    }
+
+    @Override
     public void deleteFriend(int userId, int friendId) {
         removeFriend(userId, friendId);
     }

@@ -48,7 +48,7 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable int id) {  // ← int вместо Long
+    public Film getFilmById(@PathVariable int id) {
         Film film = filmService.getFilmById(id);
         if (film == null) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
@@ -57,13 +57,13 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public void addLike(@PathVariable int filmId, @PathVariable int userId) {  // ← int вместо Long
+    public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {  // ← Long
-        filmService.removeLike(filmId.intValue(), userId.intValue());
+    public void removeLike(@PathVariable int filmId, @PathVariable int userId) {  // Изменено с Long на int
+        filmService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")
