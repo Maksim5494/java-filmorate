@@ -25,11 +25,6 @@ public class UserService {
         friendships.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
     }
 
-    /*public void removeFriend(int userId, int friendId) {
-        if (friendships.containsKey(userId)) friendships.get(userId).remove(friendId);
-        if (friendships.containsKey(friendId)) friendships.get(friendId).remove(userId);
-    }*/
-
     public void removeFriend(int userId, int friendId) {
         // Сначала проверяем, существуют ли оба пользователя
         if (userStorage.getUserById(userId) == null) {
@@ -39,7 +34,6 @@ public class UserService {
             throw new NotFoundException("Друг с id " + friendId + " не найден");
         }
 
-        // Если оба существуют, вызываем хранилище
         userStorage.deleteFriend(userId, friendId);
     }
     public List<User> getFriends(int userId) {
