@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,9 @@ import jakarta.validation.Validator;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +30,108 @@ public class FilmValidationTest {
 
     @Autowired
     private FilmService filmService;
+
+    @Autowired
+    private UserStorage userStorage;
+
+    @BeforeEach
+    void setUp() {
+        filmService.clearFilms();
+        userStorage.clearUsers(); // Убедитесь, что в UserStorage есть этот метод
+    }
+
+    private int createTestUser(String email) {
+        User user = new User();
+        user.setEmail(email);
+        user.setLogin("login" + email.hashCode());
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        return userStorage.addUser(user).getId();
+    }
+
+    @Test
+    public void testAddLike() {
+        Film film = new Film();
+        film.setName("Inception");
+        film.setDuration(148);
+        film.setReleaseDate(LocalDate.now());
+        Film addedFilm = filmService.addFilm(film);
+
+        int userId = createTestUser("user@test.com");
+
+        filmService.addLike(addedFilm.getId(), userId);
+
+        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).contains(userId);
+    }
+
+    @Test
+    public void testRemoveLike() {
+        Film film = new Film();
+        film.setName("Film");
+        film.setDuration(100);
+        film.setReleaseDate(LocalDate.now());
+        Film addedFilm = filmService.addFilm(film);
+
+        int user1 = createTestUser("u1@test.com");
+        int user2 = createTestUser("u2@test.com");
+
+        filmService.addLike(addedFilm.getId(), user1);
+        filmService.addLike(addedFilm.getId(), user2);
+
+        filmService.removeLike(addedFilm.getId(), user1);
+
+        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).doesNotContain(user1);
+        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).contains(user2);
+    }
+
+    @Test
+    public void testGetTopFilms() {
+        Film film1 = new Film();
+        film1.setName("Popular Film");
+        film1.setReleaseDate(LocalDate.now());
+        film1.setDuration(100);
+        Film addedFilm1 = filmService.addFilm(film1);
+
+        Film film2 = new Film();
+        film2.setName("Less Popular Film");
+        film2.setReleaseDate(LocalDate.now());
+        film2.setDuration(90);
+        Film addedFilm2 = filmService.addFilm(film2);
+
+        int u1 = createTestUser("1@t.com");
+        int u2 = createTestUser("2@t.com");
+        int u3 = createTestUser("3@t.com");
+
+        // У первого фильма 2 лайка
+        filmService.addLike(addedFilm1.getId(), u1);
+        filmService.addLike(addedFilm1.getId(), u2);
+
+        // У второго фильма 1 лайк
+        filmService.addLike(addedFilm2.getId(), u3);
+
+        List<Film> topFilms = filmService.getTopFilms(10);
+
+        assertThat(topFilms).hasSize(2);
+        assertThat(topFilms.get(0).getId()).isEqualTo(addedFilm1.getId());
+        assertThat(topFilms.get(1).getId()).isEqualTo(addedFilm2.getId());
+    }
+
+    @Test
+    public void testAddLikeIncreasesLikesCount() {
+        Film film = new Film();
+        film.setName("Count Test");
+        film.setDuration(100);
+        film.setReleaseDate(LocalDate.of(2023, 1, 1));
+        Film addedFilm = filmService.addFilm(film);
+
+        int u1 = createTestUser("a@t.com");
+        int u2 = createTestUser("b@t.com");
+
+        filmService.addLike(addedFilm.getId(), u1);
+        filmService.addLike(addedFilm.getId(), u2);
+
+        Film updatedFilm = filmService.getFilmById(addedFilm.getId());
+        assertThat(updatedFilm.getLikesCount()).isEqualTo(2);
+    }
 
     @Test
     public void testFilmValidation() {
@@ -78,32 +183,6 @@ public class FilmValidationTest {
     }
 
     @Test
-    public void testAddLike() {
-        Film film = new Film();
-        film.setName("Inception");
-        film.setDuration(148);
-        film.setReleaseDate(LocalDate.now());
-        Film addedFilm = filmService.addFilm(film);
-
-        filmService.addLike(addedFilm.getId(), 101);
-
-        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).contains(101);
-    }
-
-    @Test
-    public void testRemoveLike() {
-        Film film = new Film();
-        film.setId(1); // задаём ID фильма
-        filmService.addLike(1, 101);
-        filmService.addLike(1, 102);
-
-        filmService.removeLike(1, 101);
-
-        assertThat(filmService.getFilmById(1).getLikes()).doesNotContain(101);
-        assertThat(filmService.getFilmById(1).getLikes()).contains(102);
-    }
-
-    @Test
     public void testGetFilmById() {
         Film film = new Film();
         film.setName("Test Film");
@@ -146,28 +225,6 @@ public class FilmValidationTest {
     }
 
     @Test
-    public void testGetTopFilms() {
-        Film film1 = new Film();
-        film1.setName("Popular Film");
-        film1.setDescription("Very popular");
-        film1.setReleaseDate(LocalDate.now());
-        film1.setDuration(100);
-        Film addedFilm1 = filmService.addFilm(film1);
-
-        Film film2 = new Film();
-        film2.setName("Less Popular Film");
-        film2.setDescription("Not so popular");
-        film2.setReleaseDate(LocalDate.now());
-        film2.setDuration(90);
-        Film addedFilm2 = filmService.addFilm(film2);
-
-        filmService.addLike(addedFilm1.getId(), 101);
-        filmService.addLike(addedFilm1.getId(), 102);
-
-        filmService.addLike(addedFilm2.getId(), 103);
-    }
-
-    @Test
     public void testGetTopFilmsWhenNoFilms() {
         filmService.clearFilms();
 
@@ -175,18 +232,4 @@ public class FilmValidationTest {
 
         assertThat(topFilms).isEmpty();
     }
-
-    @Test
-    public void testAddLikeIncreasesLikesCount() {
-        Film film = new Film();
-        film.setReleaseDate(LocalDate.of(2023, 1, 1));
-        Film addedFilm = filmService.addFilm(film);
-
-        filmService.addLike(addedFilm.getId(), 101);
-        filmService.addLike(addedFilm.getId(), 102);
-
-        Film updatedFilm = filmService.getFilmById(addedFilm.getId());
-        assertThat(updatedFilm.getLikes()).hasSize(2);
-    }
-
 }
