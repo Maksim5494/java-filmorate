@@ -12,12 +12,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
     private final Map<Integer, Set<Integer>> friendships = new HashMap<>();
-    private int counter = 0;
+    private int idCounter = 0;
 
     @Override
     public User addUser(User user) {
-        user.setId(counter++);
-        users.put(user.getId(), user);
+        user.setId(++idCounter);
+        users.put(idCounter, user);
         return user;
     }
 
