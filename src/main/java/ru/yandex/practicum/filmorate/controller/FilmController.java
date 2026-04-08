@@ -24,7 +24,7 @@ public class FilmController {
         return filmService.addFilm(film);
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
         // Игнорируем ID из тела запроса и используем только ID из пути
         film.setId(id);
