@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ErrorHandler {
 
-        @ExceptionHandler(NotFoundException.class)
-        @ResponseStatus(HttpStatus.NOT_FOUND)
-        public Map<String, String> handleNotFound(NotFoundException e) {
-            return Map.of("error", e.getMessage());
-        }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidation(final ValidationException e) {
+        return Map.of("error", e.getMessage());
+    }
 
-        @ExceptionHandler(ValidationException.class)
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        public Map<String, String> handleValidation(ValidationException e) {
-            return Map.of("error", e.getMessage());
-        }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", e.getMessage());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
