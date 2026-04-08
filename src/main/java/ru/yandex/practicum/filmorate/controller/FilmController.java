@@ -24,7 +24,7 @@ public class FilmController {
         return filmService.addFilm(film);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public Film updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
         // Игнорируем ID из тела запроса и используем только ID из пути
         film.setId(id);
@@ -41,7 +41,7 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
-    @PutMapping
+    @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         filmService.addLike(filmId, userId);
     }
