@@ -119,7 +119,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getTopFilms(int count) {
         String sql = """
-            SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, 
+            SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate,
                    m.id as mpa_id, m.rating as mpa_name,
                    COUNT(fl.user_id) as likes_count
             FROM films f
