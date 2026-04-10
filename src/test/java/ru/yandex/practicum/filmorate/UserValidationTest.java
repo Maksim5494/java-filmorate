@@ -48,7 +48,7 @@ class UserValidationTest {
         User addedUser = userStorage.addUser(user);
 
         addedUser.setEmail("new.jane.doe@example.com");
-        userStorage.updateUser(addedUser);
+        userStorage.updateUser(addedUser.getId(), addedUser);
 
         User updatedUser = userStorage.getUserById(addedUser.getId());
         assertThat(updatedUser.getEmail()).isEqualTo("new.jane.doe@example.com");

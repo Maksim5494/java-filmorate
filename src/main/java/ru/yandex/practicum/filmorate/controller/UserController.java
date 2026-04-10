@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @RestController
 @Slf4j
 @RequestMapping("/users")
