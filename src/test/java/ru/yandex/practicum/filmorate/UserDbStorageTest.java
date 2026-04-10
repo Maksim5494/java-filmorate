@@ -47,12 +47,12 @@ class UserDbStorageTest {
 
         User retrievedUser = userStorage.getUserById(savedUser.getId());
 
-        assertThat(user)
+        assertThat(retrievedUser)
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("id", savedUser.getId())
-                .hasFieldOrPropertyWithValue("email", "user@email.ru")
-                .hasFieldOrPropertyWithValue("login", "vladimir")
-                .hasFieldOrPropertyWithValue("name", "vladimir")
-                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1990, 1, 1));
+                .hasFieldOrPropertyWithValue("email", "new@email.ru")
+                .hasFieldOrPropertyWithValue("login", "new")
+                .hasFieldOrPropertyWithValue("name", "new")
+                .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1995, 5, 5));
     }
 }
