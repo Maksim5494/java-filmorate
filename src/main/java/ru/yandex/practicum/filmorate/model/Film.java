@@ -5,8 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import jakarta.validation.constraints.*;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +27,10 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
+
+    private int rate;
+    private Mpa mpa;
+    private List<Genre> genres = new ArrayList<>();
 
     private Set<Integer> likes = new HashSet<>();
 
