@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -11,7 +12,8 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
-    private final Map<Integer, Set<Integer>> friendships = new HashMap<>();
+
+    private final Map<Integer, Map<Integer, FriendshipStatus>> friendships = new HashMap<>();
     private int idCounter = 0;
 
     @Override
@@ -47,48 +49,53 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        friendships.computeIfAbsent(id, k -> new HashSet<>()).add(friendId);
-        friendships.computeIfAbsent(friendId, k -> new HashSet<>()).add(id);
+        Map<Integer, FriendshipStatus> userFriends = friendships.computeIfAbsent(id, k -> new HashMap<>());
+        Map<Integer, FriendshipStatus> friendFriends = friendships.computeIfAbsent(friendId, k -> new HashMap<>());
+
+        if (friendFriends.containsKey(id)) {
+            // Если второй пользователь уже отправлял заявку первому — подтверждаем у обоих
+            userFriends.put(friendId, FriendshipStatus.CONFIRMED);
+            friendFriends.put(id, FriendshipStatus.CONFIRMED);
+        } else {
+            // Иначе — создаем неподтвержденную заявку у отправителя
+            userFriends.put(friendId, FriendshipStatus.UNCONFIRMED);
+        }
     }
 
     @Override
     public void removeFriend(int id, int friendId) {
-        if (!users.containsKey(id) || !users.containsKey(friendId)) {
-            throw new NotFoundException("Пользователь не найден");
+        if (friendships.containsKey(id)) {
+            friendships.get(id).remove(friendId);
         }
-
-        friendships.getOrDefault(id, new HashSet<>()).remove(friendId);
-        friendships.getOrDefault(friendId, new HashSet<>()).remove(id);
+        // Если дружба была подтвержденной, у второго пользователя статус должен смениться
+        // или удалиться (зависит от логики бизнеса, обычно удаляется связь вовсе)
+        if (friendships.containsKey(friendId)) {
+            friendships.get(friendId).remove(id);
+        }
     }
 
     @Override
     public List<User> getFriends(int id) {
         if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователь с ID " + id + " не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
-        Set<Integer> friendIds = friendships.getOrDefault(id, new HashSet<>());
-        return friendIds.stream()
-                .map(this::getUserById)
-                .filter(Objects::nonNull)
+        Map<Integer, FriendshipStatus> userFriends = friendships.getOrDefault(id, Collections.emptyMap());
+
+        // Возвращаем всех, кому мы отправили заявку или с кем дружба подтверждена
+        return userFriends.keySet().stream()
+                .map(users::get)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getCommonFriends(int id1, int id2) {
-        if (!users.containsKey(id1) || !users.containsKey(id2)) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        Set<Integer> friends1 = friendships.getOrDefault(id1, Collections.emptyMap()).keySet();
+        Set<Integer> friends2 = friendships.getOrDefault(id2, Collections.emptyMap()).keySet();
 
-        Set<Integer> friends1 = friendships.getOrDefault(id1, new HashSet<>());
-        Set<Integer> friends2 = friendships.getOrDefault(id2, new HashSet<>());
-
-        Set<Integer> commonIds = new HashSet<>(friends1);
-        commonIds.retainAll(friends2);
-
-        return commonIds.stream()
-                .map(this::getUserById)
-                .filter(Objects::nonNull)
+        return friends1.stream()
+                .filter(friends2::contains)
+                .map(users::get)
                 .collect(Collectors.toList());
     }
 
