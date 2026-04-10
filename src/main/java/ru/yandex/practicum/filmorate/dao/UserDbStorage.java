@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -37,7 +36,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        long id = jdbcTemplate.update(connection -> {
+        jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement(sql, new String[]{"user_id"});
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getLogin());
@@ -46,8 +45,10 @@ public class UserDbStorage implements UserStorage {
             return ps;
         });
 
-        Integer generatedId = jdbcTemplate.queryForObject("SELECT MAX(user_id) FROM users", Integer.class);
-        user.setId(generatedId != null ? generatedId : 0);
+        Integer generatedId = jdbcTemplate.queryForObject("SELECT SCOPE_IDENTITY()", Integer.class);
+        if (generatedId != null) {
+            user.setId(generatedId);
+        }
         return user;
     }
 
@@ -101,11 +102,7 @@ public class UserDbStorage implements UserStorage {
                 WHERE f.user_id = ?
                 ORDER BY u.user_id
                 """;
-        try {
-            return jdbcTemplate.query(sql, userMapper, id);
-        } catch (EmptyResultDataAccessException e) {
-            return Collections.emptyList();
-        }
+        return jdbcTemplate.query(sql, userMapper, id);
     }
 
     @Override
@@ -119,11 +116,6 @@ public class UserDbStorage implements UserStorage {
                 ORDER BY u.user_id
                 """;
         return jdbcTemplate.query(sql, userMapper, id, otherId);
-    }
-
-    @Override
-    public void deleteFriend(int userId, int friendId) {
-        removeFriend(userId, friendId);
     }
 
     @Override

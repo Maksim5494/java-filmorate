@@ -83,15 +83,23 @@ public class InMemoryUserStorage implements UserStorage {
         Map<Integer, FriendshipStatus> userFriends = friendships.getOrDefault(id, Collections.emptyMap());
 
         // Возвращаем всех, кому мы отправили заявку или с кем дружба подтверждена
-        return userFriends.keySet().stream()
-                .map(users::get)
+        return userFriends.entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(entry -> users.get(entry.getKey()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getCommonFriends(int id1, int id2) {
-        Set<Integer> friends1 = friendships.getOrDefault(id1, Collections.emptyMap()).keySet();
-        Set<Integer> friends2 = friendships.getOrDefault(id2, Collections.emptyMap()).keySet();
+        Set<Integer> friends1 = friendships.getOrDefault(id1, Collections.emptyMap()).entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        Set<Integer> friends2 = friendships.getOrDefault(id2, Collections.emptyMap()).entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
 
         return friends1.stream()
                 .filter(friends2::contains)
@@ -101,12 +109,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public boolean exists(int id) {
-        return users.containsKey(id);
-    }
 
-    @Override
-    public void deleteFriend(int userId, int friendId) {
-        removeFriend(userId, friendId);
+        return users.containsKey(id);
     }
 
     @Override

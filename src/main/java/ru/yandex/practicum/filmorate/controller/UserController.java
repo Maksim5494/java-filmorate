@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @RestController
 @Slf4j
 @RequestMapping("/users")
@@ -26,9 +28,10 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        log.info("Обновление пользователя");
+    @PutMapping("/{id}")
+    public User updateUser(@PathVariable int id, @Valid @RequestBody User user) {
+        log.info("Обновление пользователя с id={}", id);
+        user.setId(id);
         return userService.updateUser(user);
     }
 

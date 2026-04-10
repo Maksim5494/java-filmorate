@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
