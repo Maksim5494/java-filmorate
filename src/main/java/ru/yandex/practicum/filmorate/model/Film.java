@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import jakarta.validation.constraints.*;
 import java.util.List;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 @Data
 @NoArgsConstructor
