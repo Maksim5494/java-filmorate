@@ -109,10 +109,10 @@ public class UserDbStorage implements UserStorage {
         String sql = """
             SELECT u.* FROM users u
             WHERE u.id IN (
-                SELECT f.friend_id FROM friendships f 
+                SELECT f.friend_id FROM friendships f
                 WHERE f.user_id = ? AND f.status = true
                 INTERSECT
-                SELECT f.friend_id FROM friendships f 
+                SELECT f.friend_id FROM friendships f
                 WHERE f.user_id = ? AND f.status = true
             )
             """;
