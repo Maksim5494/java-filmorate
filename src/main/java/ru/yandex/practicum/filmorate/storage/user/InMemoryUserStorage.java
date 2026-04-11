@@ -16,12 +16,17 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, Map<Integer, FriendshipStatus>> friendships = new HashMap<>();
     private int idCounter = 0;
 
-    @Override
-    public User addUser(User user) {
-        user.setId(++idCounter);
-        users.put(idCounter, user);
-        return user;
-    }
+   @Override
+   public User addUser(User user) {
+       if (user.getName() == null || user.getName().isBlank()) {
+           user.setName(user.getLogin());
+       }
+
+       user.setId(++idCounter);
+       users.put(idCounter, user);
+
+       return user;
+   }
 
     @Override
     public User getUserById(int id) {
