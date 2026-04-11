@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +23,7 @@ class UserValidationTest {
     private Validator validator;
 
     @Autowired
-    private UserStorage userStorage;
+    private InMemoryUserStorage userStorage;
 
     @Test
     void testUserValidation() {

@@ -44,34 +44,23 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public void removeFriend(int id, int friendId) {
+        if (friendships.containsKey(id)) {
+            friendships.get(id).remove(friendId);
+        }
+        if (friendships.containsKey(friendId)) {
+            friendships.get(friendId).remove(id);
+        }
+    }
+
+    @Override
     public void addFriend(int id, int friendId) {
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        Map<Integer, FriendshipStatus> userFriends = friendships.computeIfAbsent(id, k -> new HashMap<>());
-        Map<Integer, FriendshipStatus> friendFriends = friendships.computeIfAbsent(friendId, k -> new HashMap<>());
-
-        if (friendFriends.containsKey(id)) {
-            // Если второй пользователь уже отправлял заявку первому — подтверждаем у обоих
-            userFriends.put(friendId, FriendshipStatus.CONFIRMED);
-            friendFriends.put(id, FriendshipStatus.CONFIRMED);
-        } else {
-            // Иначе — создаем неподтвержденную заявку у отправителя
-            userFriends.put(friendId, FriendshipStatus.UNCONFIRMED);
-        }
-    }
-
-    @Override
-    public void removeFriend(int id, int friendId) {
-        if (friendships.containsKey(id)) {
-            friendships.get(id).remove(friendId);
-        }
-        // Если дружба была подтвержденной, у второго пользователя статус должен смениться
-        // или удалиться (зависит от логики бизнеса, обычно удаляется связь вовсе)
-        if (friendships.containsKey(friendId)) {
-            friendships.get(friendId).remove(id);
-        }
+        friendships.computeIfAbsent(id, k -> new HashMap<>()).put(friendId, FriendshipStatus.CONFIRMED);
+        friendships.computeIfAbsent(friendId, k -> new HashMap<>()).put(id, FriendshipStatus.CONFIRMED);
     }
 
     @Override
@@ -82,7 +71,6 @@ public class InMemoryUserStorage implements UserStorage {
 
         Map<Integer, FriendshipStatus> userFriends = friendships.getOrDefault(id, Collections.emptyMap());
 
-        // Возвращаем всех, кому мы отправили заявку или с кем дружба подтверждена
         return userFriends.entrySet().stream()
                 .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
                 .map(entry -> users.get(entry.getKey()))

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,9 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository
 @RequiredArgsConstructor
-@Qualifier("userDbStorage")
+@Repository
+@Primary
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -24,11 +24,14 @@ public class UserDbStorage implements UserStorage {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
             User user = new User();
-            user.setId(rs.getInt("user_id"));
+            user.setId(rs.getInt("id"));
             user.setEmail(rs.getString("email"));
             user.setLogin(rs.getString("login"));
             user.setName(rs.getString("name"));
-            user.setBirthday(rs.getDate("birthday").toLocalDate());
+            var birthday = rs.getDate("birthday");
+            if (birthday != null) {
+                user.setBirthday(birthday.toLocalDate());
+            }
             return user;
         }
     };
@@ -36,16 +39,13 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(connection -> {
-            var ps = connection.prepareStatement(sql, new String[]{"user_id"});
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getLogin());
-            ps.setString(3, user.getName());
-            ps.setDate(4, java.sql.Date.valueOf(user.getBirthday()));
-            return ps;
-        });
+        jdbcTemplate.update(sql,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                java.sql.Date.valueOf(user.getBirthday()));
 
-        Integer generatedId = jdbcTemplate.queryForObject("SELECT SCOPE_IDENTITY()", Integer.class);
+        Integer generatedId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM users", Integer.class);
         if (generatedId != null) {
             user.setId(generatedId);
         }
@@ -54,7 +54,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        String sql = "SELECT * FROM users WHERE user_id = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, userMapper, id);
         } catch (EmptyResultDataAccessException e) {
@@ -64,7 +64,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(int id, User updatedUser) {
-        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
         jdbcTemplate.update(sql,
                 updatedUser.getEmail(),
                 updatedUser.getLogin(),
@@ -77,56 +77,38 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        String sql = "SELECT * FROM users ORDER BY user_id";
+        String sql = "SELECT * FROM users ORDER BY id";
         return jdbcTemplate.query(sql, userMapper);
     }
 
     @Override
     public void addFriend(int id, int friendId) {
-        String sql = "INSERT INTO friendship (user_id, friend_id) VALUES (?, ?)";
-        jdbcTemplate.update(sql, id, friendId);
+        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
     }
 
     @Override
     public void removeFriend(int id, int friendId) {
-        String sql = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
-        jdbcTemplate.update(sql, id, friendId);
+        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
     }
 
     @Override
     public List<User> getFriends(int id) {
-        String sql = """
-                SELECT u.*
-                FROM users u
-                JOIN friendship f ON u.user_id = f.friend_id
-                WHERE f.user_id = ?
-                ORDER BY u.user_id
-                """;
-        return jdbcTemplate.query(sql, userMapper, id);
+        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
     }
 
     @Override
     public List<User> getCommonFriends(int id, int otherId) {
-        String sql = """
-                SELECT u.*
-                FROM users u
-                JOIN friendship f1 ON u.user_id = f1.friend_id
-                JOIN friendship f2 ON u.user_id = f2.friend_id
-                WHERE f1.user_id = ? AND f2.user_id = ?
-                ORDER BY u.user_id
-                """;
-        return jdbcTemplate.query(sql, userMapper, id, otherId);
+        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
     }
 
     @Override
     public void clearUsers() {
-        jdbcTemplate.update("DELETE FROM friendship");
         jdbcTemplate.update("DELETE FROM users");
     }
 
     @Override
     public boolean exists(int id) {
-        String sql = "SELECT EXISTS(SELECT 1 FROM users WHERE user_id = ?)";
+        String sql = "SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)";
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
         return exists != null && exists;
     }
