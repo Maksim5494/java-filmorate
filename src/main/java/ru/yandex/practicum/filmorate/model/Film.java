@@ -25,12 +25,6 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
 
-    //  жанры
-    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
-
-    // Рейтинг
-    private Mpa mpa;
-
     private Set<Integer> likes = new HashSet<>();
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
@@ -45,4 +39,18 @@ public class Film {
     public int getLikesCount() {
         return likes.size();
     }
+
+    //  жанры
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+
+    public void addGenre(Genre genre) {
+        genres.add(genre);
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = new LinkedHashSet<>(genres);
+    }
+
+    // Рейтинг
+    private Mpa mpa;
 }

@@ -25,6 +25,4 @@ public class Genre {
     public int hashCode() {
         return id;
     }
-
-
 }
