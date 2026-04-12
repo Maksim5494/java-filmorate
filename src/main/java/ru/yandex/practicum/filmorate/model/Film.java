@@ -47,6 +47,10 @@ public class Film {
         genres.add(genre);
     }
 
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
     public void setGenres(Set<Genre> genres) {
         this.genres = new LinkedHashSet<>(genres);
     }
