@@ -39,8 +39,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";
-
+        String sql = "INSERT INTO films (name, description, release_date, duration, mpa_id) VALUES (?, ?, ?, ?, ?)";
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -57,6 +56,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void updateFilm(int id, Film film) {
+        if (!exists(id)) {
+            throw new NotFoundException("Film with id " + id + " not found");
+        }
+
         String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
         jdbcTemplate.update(sql,
                 film.getName(),

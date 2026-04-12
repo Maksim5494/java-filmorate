@@ -40,6 +40,10 @@ public class UserDbStorage implements UserStorage {
     };
 
     public User addUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+
         String checkSql = "SELECT * FROM users WHERE email = ?";
         List<User> existingUsers = jdbcTemplate.query(checkSql, userMapper, user.getEmail());
         if (!existingUsers.isEmpty()) {
@@ -74,6 +78,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(int id, User updatedUser) {
+        if (!exists(id)) {
+            throw new RuntimeException("User with id " + id + " not found");
+        }
+
+        if (updatedUser.getName() == null || updatedUser.getName().isBlank()) {
+            updatedUser.setName(updatedUser.getLogin());
+        }
+
         String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
         jdbcTemplate.update(sql,
                 updatedUser.getEmail(),
@@ -81,6 +93,7 @@ public class UserDbStorage implements UserStorage {
                 updatedUser.getName(),
                 java.sql.Date.valueOf(updatedUser.getBirthday()),
                 id);
+
         updatedUser.setId(id);
         return updatedUser;
     }
