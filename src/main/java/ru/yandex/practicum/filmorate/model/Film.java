@@ -40,7 +40,6 @@ public class Film {
         return likes.size();
     }
 
-    //  жанры
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public void addGenre(Genre genre) {
@@ -55,6 +54,5 @@ public class Film {
         this.genres = new LinkedHashSet<>(genres);
     }
 
-    // Рейтинг
     private Mpa mpa;
 }

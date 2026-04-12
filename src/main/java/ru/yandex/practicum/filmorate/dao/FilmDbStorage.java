@@ -37,19 +37,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     };
 
-    /*@Override
-    public Film addFilm(Film film) {
-        String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                film.getName(),
-                film.getDescription(),
-                java.sql.Date.valueOf(film.getReleaseDate()),
-                film.getDuration());
-
-        Integer generatedId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM films", Integer.class);
-        film.setId(generatedId != null ? generatedId : 0);
-        return film;
-    }*/
     @Override
     public Film addFilm(Film film) {
         String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";

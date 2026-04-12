@@ -39,25 +39,6 @@ public class UserDbStorage implements UserStorage {
         }
     };
 
-    /*@Override
-    public User addUser(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
-                user.getEmail(),
-                user.getLogin(),
-                user.getName(),
-                java.sql.Date.valueOf(user.getBirthday()));
-
-        Integer generatedId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM users", Integer.class);
-        if (generatedId != null) {
-            user.setId(generatedId);
-        }
-        return user;
-    }*/
-
     public User addUser(User user) {
         String checkSql = "SELECT * FROM users WHERE email = ?";
         List<User> existingUsers = jdbcTemplate.query(checkSql, userMapper, user.getEmail());
@@ -80,8 +61,6 @@ public class UserDbStorage implements UserStorage {
         user.setId(keyHolder.getKey().intValue());
         return user;
     }
-
-
 
     @Override
     public User getUserById(int id) {
