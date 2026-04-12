@@ -5,12 +5,15 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class UserDbStorage implements UserStorage {
         }
     };
 
-    @Override
+    /*@Override
     public User addUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -53,7 +56,32 @@ public class UserDbStorage implements UserStorage {
             user.setId(generatedId);
         }
         return user;
+    }*/
+
+    public User addUser(User user) {
+        String checkSql = "SELECT * FROM users WHERE email = ?";
+        List<User> existingUsers = jdbcTemplate.query(checkSql, userMapper, user.getEmail());
+        if (!existingUsers.isEmpty()) {
+            throw new RuntimeException("User with this email already exists");
+        }
+
+        String insertSql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
+
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getLogin());
+            ps.setString(3, user.getName());
+            ps.setDate(4, java.sql.Date.valueOf(user.getBirthday()));
+            return ps;
+        }, keyHolder);
+
+        user.setId(keyHolder.getKey().intValue());
+        return user;
     }
+
+
 
     @Override
     public User getUserById(int id) {

@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapTest {
@@ -37,6 +37,13 @@ class MapTest {
     }
 
     @Test
+    void shouldReturnNullForNonexistentGenreId() {
+        genres.put(3, new Genre(3, "Horror"));
+        assertNull(genres.get(999));
+        assertFalse(genres.containsKey(999));  // Дополнительная проверка
+    }
+
+    @Test
     void shouldRemoveGenre() {
         Genre genre = new Genre(4, "Sci-Fi");
         genres.put(genre.getId(), genre);
@@ -50,16 +57,38 @@ class MapTest {
         genres.put(6, new Genre(6, "Thriller"));
 
         List<Genre> allGenres = new ArrayList<>(genres.values());
-        assertEquals(2, allGenres.size());
 
-        boolean hasRomance = allGenres.stream().anyMatch(g -> g.getId() == 5 && g.getName().equals("Romance"));
-        boolean hasThriller = allGenres.stream().anyMatch(g -> g.getId() == 6 && g.getName().equals("Thriller"));
-        assertTrue(hasRomance);
-        assertTrue(hasThriller);
+        assertThat(allGenres)
+                .extracting("id", "name")
+                .contains(
+                        tuple(5, "Romance"),
+                        tuple(6, "Thriller")
+                );
+    }
+
+
+    @Test
+    void shouldNotAllowDuplicateId() {
+        Genre firstGenre = new Genre(1, "Action");
+        Genre secondGenre = new Genre(1, "Another Action");  // Тот же ID, другое название
+
+        genres.put(firstGenre.getId(), firstGenre);
+        genres.put(secondGenre.getId(), secondGenre);
+
+        assertTrue(genres.containsKey(1));
+        assertEquals("Another Action", genres.get(1).getName());
     }
 
     @Test
     void shouldReturnZeroWhenEmpty() {
+        List<Genre> allGenres = new ArrayList<>(genres.values());
+        assertEquals(0, allGenres.size());
+    }
+
+    @Test
+    void shouldReturnZeroWhenMapIsEmpty() {
+        genres.put(1, new Genre(1, "Action"));
+        genres.remove(1);  // Удалили единственный жанр
         List<Genre> allGenres = new ArrayList<>(genres.values());
         assertEquals(0, allGenres.size());
     }

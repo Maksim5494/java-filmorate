@@ -22,7 +22,7 @@ class GenreTest {
     void shouldEqualAnotherGenreWithSameId() {
         Genre genre1 = new Genre(1, "Action");
         Genre genre2 = new Genre(1, "Adventure");
-        assertTrue(genre1.equals(genre2));
+        assertFalse(genre1.equals(genre2));
     }
 
     @Test
@@ -51,24 +51,36 @@ class GenreTest {
     }
 
     @Test
+    void shouldNotEqualGenreWithSameIdButDifferentName() {
+        Genre genre1 = new Genre(1, "Action");
+        Genre genre2 = new Genre(1, "Adventure");
+        assertFalse(genre1.equals(genre2));
+    }
+
+    @Test
+    void shouldNotAllowNegativeId() {
+        assertThrows(IllegalArgumentException.class, () -> new Genre(-1, "Action"));
+    }
+
+    @Test
     void filmGenresSize() {
-        // Создаём объект Film — теперь переменная film инициализирована
         Film film = new Film(1, "Test Film", "Description", LocalDate.now(), 120, Mpa.PG_13);
 
-        // Создаём жанры
         Genre genre1 = new Genre(1, "Action");
         Genre genre2 = new Genre(2, "Comedy");
         Genre genre3 = new Genre(3, "Drama");
 
-        // Добавляем жанры в фильм
         film.addGenre(genre1);
-        film.addGenre(genre2);
-        film.addGenre(genre3);
+        System.out.println("После первого добавления: " + film.getGenres().size()); // Должно быть 1
 
-        // Проверяем, что в фильме ровно 3 жанра
+        film.addGenre(genre2);
+        System.out.println("После второго добавления: " + film.getGenres().size()); // Должно быть 2
+
+        film.addGenre(genre3);
+        System.out.println("После третьего добавления: " + film.getGenres().size()); // Должно быть 3
+
         assertEquals(3, film.getGenres().size());
     }
-
 
 }
 

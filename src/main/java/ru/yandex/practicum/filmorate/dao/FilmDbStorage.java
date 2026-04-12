@@ -5,13 +5,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -34,7 +37,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     };
 
-    @Override
+    /*@Override
     public Film addFilm(Film film) {
         String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql,
@@ -45,6 +48,23 @@ public class FilmDbStorage implements FilmStorage {
 
         Integer generatedId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM films", Integer.class);
         film.setId(generatedId != null ? generatedId : 0);
+        return film;
+    }*/
+    @Override
+    public Film addFilm(Film film) {
+        String sql = "INSERT INTO films (name, description, release_date, duration) VALUES (?, ?, ?, ?)";
+
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
+            ps.setDate(3, java.sql.Date.valueOf(film.getReleaseDate()));
+            ps.setInt(4, film.getDuration());
+            return ps;
+        }, keyHolder);
+
+        film.setId(keyHolder.getKey().intValue());
         return film;
     }
 

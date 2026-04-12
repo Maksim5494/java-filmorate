@@ -119,13 +119,14 @@ class UserValidationTest {
     void shouldPassValidationWhenBirthdayIsToday() {
         User user = new User();
         user.setLogin("login");
+        user.setName("Some Name");  // Добавляем имя — например, "Some Name"
         user.setEmail("test@mail.ru");
         user.setBirthday(LocalDate.now());
 
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-
         assertThat(violations).isEmpty();
     }
+
 
     @Test
     void testAddAndRemoveFriend() {

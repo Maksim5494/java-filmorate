@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 @JdbcTest
 @AutoConfigureTestDatabase
@@ -55,4 +56,22 @@ class UserDbStorageTest {
                 .hasFieldOrPropertyWithValue("name", "new")
                 .hasFieldOrPropertyWithValue("birthday", LocalDate.of(1995, 5, 5));
     }
+
+    @Test
+    void testFindNonexistentUser() {
+        User user = userStorage.getUserById(-1);  // ID, которого точно нет в базе
+        assertThat(user).isNull();  // Или другой ожидаемый результат, например, исключение
+    }
+
+    @Test
+    void testUniqueEmail() {
+        User existingUser = new User(0, "unique@email.ru", "user", "user", LocalDate.of(1990, 1, 1));
+        userStorage.addUser(existingUser);
+
+        User newUserWithSameEmail = new User(0, "unique@email.ru", "anotherUser", "anotherUser", LocalDate.of(1995, 5, 5));
+        Throwable exception = catchThrowable(() -> userStorage.addUser(newUserWithSameEmail));
+
+        assertThat(exception).isInstanceOf(RuntimeException.class);  // Или другой ожидаемый тип исключения
+    }
+
 }

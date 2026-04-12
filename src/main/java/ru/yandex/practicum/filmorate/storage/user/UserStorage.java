@@ -25,4 +25,3 @@ public interface UserStorage {
 
     void clearUsers();
 }
-
