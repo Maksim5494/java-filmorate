@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -83,9 +84,30 @@ public class FilmService {
     }
 
     private void validate(Film film) {
-        if (film.getReleaseDate() != null &&
-                film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
+        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+        }
+
+        if (film.getMpa() == null || film.getMpa().getId() <= 0) {
+            throw new ValidationException("Не указан рейтинг MPA");
+        }
+
+        Mpa mpa = filmStorage.getMpaById(film.getMpa().getId());
+        if (mpa == null) {
+            throw new NotFoundException("MPA с id=" + film.getMpa().getId() + " не найден");
+        }
+        film.setMpa(mpa);
+
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            LinkedHashSet<Genre> validGenres = new LinkedHashSet<>();
+            for (Genre genre : film.getGenres()) {
+                Genre foundGenre = filmStorage.getGenreById(genre.getId());
+                if (foundGenre == null) {
+                    throw new NotFoundException("Жанр с id=" + genre.getId() + " не найден");
+                }
+                validGenres.add(foundGenre);
+            }
+            film.setGenres(validGenres);
         }
     }
 
@@ -94,7 +116,11 @@ public class FilmService {
     }
 
     public Genre getGenreById(int id) {
-        return filmStorage.getGenreById(id);
+        Genre genre = filmStorage.getGenreById(id);
+        if (genre == null) {
+            throw new NotFoundException("Жанр с id=" + id + " не найден");
+        }
+        return genre;
     }
 
     public List<Mpa> getAllMpa() {
@@ -102,6 +128,10 @@ public class FilmService {
     }
 
     public Mpa getMpaById(int id) {
-        return filmStorage.getMpaById(id);
+        Mpa mpa = filmStorage.getMpaById(id);
+        if (mpa == null) {
+            throw new NotFoundException("MPA с id=" + id + " не найден");
+        }
+        return mpa;
     }
 }

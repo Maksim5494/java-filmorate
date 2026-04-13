@@ -49,14 +49,20 @@ public class FilmValidationTest {
         return userStorage.addUser(user).getId();
     }
 
+    private Film createValidFilm() {
+        Film film = new Film();
+        film.setName("Default Film Name");
+        film.setDescription("Some description");
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(120);
+        film.setMpa(Mpa.PG_13);
+        return film;
+    }
+
     @Test
     public void testAddLike() {
-        Film film = new Film();
-        film.setName("Inception");
-        film.setDuration(148);
-        film.setReleaseDate(LocalDate.now());
+        Film film = createValidFilm();
         Film addedFilm = filmService.addFilm(film);
-
         int userId = createTestUser("user@test.com");
 
         filmService.addLike(addedFilm.getId(), userId);
@@ -70,6 +76,7 @@ public class FilmValidationTest {
         film.setName("Film");
         film.setDuration(100);
         film.setReleaseDate(LocalDate.now());
+        film.setMpa(Mpa.PG_13);
         Film addedFilm = filmService.addFilm(film);
 
         int user1 = createTestUser("u1@test.com");
@@ -90,12 +97,14 @@ public class FilmValidationTest {
         film1.setName("Popular Film");
         film1.setReleaseDate(LocalDate.now());
         film1.setDuration(100);
+        film1.setMpa(Mpa.PG_13);
         Film addedFilm1 = filmService.addFilm(film1);
 
         Film film2 = new Film();
         film2.setName("Less Popular Film");
         film2.setReleaseDate(LocalDate.now());
         film2.setDuration(90);
+        film2.setMpa(Mpa.PG_13);
         Film addedFilm2 = filmService.addFilm(film2);
 
         int u1 = createTestUser("1@t.com");
@@ -120,6 +129,7 @@ public class FilmValidationTest {
         film.setName("Count Test");
         film.setDuration(100);
         film.setReleaseDate(LocalDate.of(2023, 1, 1));
+        film.setMpa(Mpa.PG_13);
         Film addedFilm = filmService.addFilm(film);
 
         int u1 = createTestUser("a@t.com");
@@ -142,16 +152,6 @@ public class FilmValidationTest {
         assertThat(violations).isNotEmpty();
     }
 
-    private Film createValidFilm() {
-        Film film = new Film();
-        film.setName("Test Film");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(2000, 1, 1));
-        film.setDuration(120);
-        film.setMpa(new Mpa(1, "G")); // Добавляем MPA
-        return film;
-    }
-
     @Test
     public void testAddFilm() {
         Film film = createValidFilm();
@@ -162,23 +162,14 @@ public class FilmValidationTest {
 
     @Test
     void testUpdateFilm() {
-        Film film = new Film();
-        film.setName("Фильм для обновления");
-        film.setDescription("Описание");
-        film.setReleaseDate(LocalDate.of(2000, 1, 1));
-        film.setDuration(120);
-
+        Film film = createValidFilm();
         Film createdFilm = filmService.addFilm(film);
-        int filmId = createdFilm.getId();
 
-        Film updatedFilm = new Film();
-        updatedFilm.setId(filmId);
-        updatedFilm.setName("Обновленное название");
+        Film updatedFilm = createValidFilm();
+        updatedFilm.setId(createdFilm.getId());
         updatedFilm.setDescription("Обновленное описание");
-        updatedFilm.setReleaseDate(LocalDate.of(2001, 1, 1));
-        updatedFilm.setDuration(150);
 
-        Film result = filmService.updateFilm(filmId, updatedFilm);
+        Film result = filmService.updateFilm(createdFilm.getId(), updatedFilm);
 
         assertEquals("Обновленное название", result.getName());
         assertEquals("Обновленное описание", result.getDescription());
@@ -191,6 +182,7 @@ public class FilmValidationTest {
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.now());
         film.setDuration(120);
+        film.setMpa(Mpa.PG_13);
 
         Film addedFilm = filmService.addFilm(film);
 
@@ -210,6 +202,7 @@ public class FilmValidationTest {
         film1.setDescription("Desc 1");
         film1.setReleaseDate(LocalDate.now());
         film1.setDuration(90);
+        film1.setMpa(Mpa.PG_13);
         filmService.addFilm(film1);
 
         Film film2 = new Film();
@@ -217,13 +210,15 @@ public class FilmValidationTest {
         film2.setDescription("Desc 2");
         film2.setReleaseDate(LocalDate.now());
         film2.setDuration(120);
+        film2.setMpa(Mpa.PG_13);
         filmService.addFilm(film2);
 
         List<Film> allFilms = filmService.getAllFilms();
 
-        assertThat(allFilms).isNotNull();
         assertThat(allFilms.size()).isEqualTo(2);
-        assertThat(allFilms).contains(film1, film2);
+        assertThat(allFilms)
+                .extracting("id")
+                .contains(film1.getId(), film2.getId());
     }
 
     @Test

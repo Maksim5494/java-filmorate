@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Film {
     private int id;
 
@@ -24,7 +26,7 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов")
     private String description;
 
-    @NotNull
+    @NotNull(message = "Дата релиза не может быть пустой")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
 
@@ -35,15 +37,6 @@ public class Film {
 
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
-    public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
-
     private Mpa mpa;
 
     public int getLikesCount() {
@@ -51,6 +44,9 @@ public class Film {
     }
 
     public void addGenre(Genre genre) {
+        if (genres == null) {
+            genres = new LinkedHashSet<>();
+        }
         genres.add(genre);
     }
 
@@ -59,6 +55,6 @@ public class Film {
     }
 
     public void setGenres(Set<Genre> genres) {
-        this.genres = new LinkedHashSet<>(genres);
+        this.genres = genres == null ? new LinkedHashSet<>() : new LinkedHashSet<>(genres);
     }
 }

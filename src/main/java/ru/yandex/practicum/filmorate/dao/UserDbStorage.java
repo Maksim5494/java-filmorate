@@ -6,8 +6,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -35,7 +35,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -56,7 +56,7 @@ public class UserDbStorage implements UserStorage {
         try {
             return jdbcTemplate.queryForObject(sql, userMapper, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
+            return null;
         }
     }
 
@@ -69,7 +69,9 @@ public class UserDbStorage implements UserStorage {
                 updatedUser.getName(),
                 java.sql.Date.valueOf(updatedUser.getBirthday()),
                 id);
-        if (rows == 0) throw new NotFoundException("Пользователь не найден");
+        if (rows == 0) {
+            return null;
+        }
         updatedUser.setId(id);
         return updatedUser;
     }
@@ -81,8 +83,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        String sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, id, friendId, "CONFIRMED");
+        String checkSql = "SELECT COUNT(*) FROM friendships WHERE user_id = ? AND friend_id = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, id, friendId);
+
+        if (count != null && count == 0) {
+            String sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES (?, ?, ?)";
+            jdbcTemplate.update(sql, id, friendId, "CONFIRMED");
+        }
     }
 
     @Override
@@ -93,16 +100,26 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(int id) {
-        String sql = "SELECT u.* FROM users u JOIN friendships f ON u.id = f.friend_id WHERE f.user_id = ?";
+        String sql = """
+            SELECT u.*
+            FROM users u
+            JOIN friendships f ON u.id = f.friend_id
+            WHERE f.user_id = ?
+            ORDER BY u.id
+            """;
         return jdbcTemplate.query(sql, userMapper, id);
     }
 
     @Override
     public List<User> getCommonFriends(int id, int otherId) {
-        String sql = "SELECT u.* FROM users u " +
-                "JOIN friendships f1 ON u.id = f1.friend_id " +
-                "JOIN friendships f2 ON u.id = f2.friend_id " +
-                "WHERE f1.user_id = ? AND f2.user_id = ?";
+        String sql = """
+            SELECT u.*
+            FROM users u
+            JOIN friendships f1 ON u.id = f1.friend_id
+            JOIN friendships f2 ON u.id = f2.friend_id
+            WHERE f1.user_id = ? AND f2.user_id = ?
+            ORDER BY u.id
+            """;
         return jdbcTemplate.query(sql, userMapper, id, otherId);
     }
 

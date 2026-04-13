@@ -20,14 +20,8 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable int id, @Valid @RequestBody User user) {
-        user.setId(id);
-        return userService.updateUser(user);
-    }
-
     @PutMapping
-    public User updateUserLegacy(@Valid @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }
 

@@ -135,10 +135,11 @@ class UserValidationTest {
         userStorage.addFriend(u1.getId(), u2.getId());
 
         assertThat(userStorage.getFriends(u1.getId())).hasSize(1);
-        assertThat(userStorage.getFriends(u2.getId())).hasSize(1);
+        assertThat(userStorage.getFriends(u2.getId())).hasSize(0);
 
         userStorage.removeFriend(u1.getId(), u2.getId());
 
         assertThat(userStorage.getFriends(u1.getId())).isEmpty();
+        assertThat(userStorage.getFriends(u2.getId())).isEmpty();
     }
 }

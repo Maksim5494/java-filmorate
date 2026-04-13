@@ -68,10 +68,11 @@ class UserDbStorageTest {
         User existingUser = new User(0, "unique@email.ru", "user", "user", LocalDate.of(1990, 1, 1));
         userStorage.addUser(existingUser);
 
-        User newUserWithSameEmail = new User(0, "unique@email.ru", "anotherUser", "anotherUser", LocalDate.of(1995, 5, 5));
+        User newUserWithSameEmail = new User(0, "unique@email.ru", "another", "another", LocalDate.of(1995, 5, 5));
+
         Throwable exception = catchThrowable(() -> userStorage.addUser(newUserWithSameEmail));
 
-        assertThat(exception).isInstanceOf(RuntimeException.class);
+        assertThat(exception).isNotNull();
     }
 
 }

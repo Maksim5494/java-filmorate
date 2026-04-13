@@ -12,7 +12,7 @@ public interface FilmStorage {
 
     Film getFilmById(int id);
 
-    void updateFilm(int id, Film film);
+    Film updateFilm(int id, Film film);
 
     List<Film> getAllFilms();
 
@@ -33,7 +33,4 @@ public interface FilmStorage {
     List<Mpa> getAllMpa();
 
     Mpa getMpaById(int id);
-
 }
-
-

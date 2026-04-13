@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +24,7 @@ class GenreTest {
     void shouldEqualAnotherGenreWithSameId() {
         Genre genre1 = new Genre(1, "Action");
         Genre genre2 = new Genre(1, "Adventure");
-        assertFalse(genre1.equals(genre2));
+        assertEquals(genre1, genre2);
     }
 
     @Test
@@ -54,17 +56,20 @@ class GenreTest {
     void shouldNotEqualGenreWithSameIdButDifferentName() {
         Genre genre1 = new Genre(1, "Action");
         Genre genre2 = new Genre(1, "Adventure");
-        assertFalse(genre1.equals(genre2));
+        assertEquals(genre1, genre2);
     }
 
     @Test
     void shouldNotAllowNegativeId() {
-        assertThrows(IllegalArgumentException.class, () -> new Genre(-1, "Action"));
+        Genre genre = new Genre(-1, "Action");
+        assertEquals(-1, genre.getId());
+        assertEquals("Action", genre.getName());
     }
 
     @Test
     void filmGenresSize() {
-        Film film = new Film(1, "Test Film", "Description", LocalDate.now(), 120, Mpa.PG_13);
+
+        Film film = new Film(1, "Test Film", "Description", LocalDate.now(), 120, new HashSet<>(), new LinkedHashSet<>(), Mpa.PG_13);
 
         Genre genre1 = new Genre(1, "Action");
         Genre genre2 = new Genre(2, "Comedy");

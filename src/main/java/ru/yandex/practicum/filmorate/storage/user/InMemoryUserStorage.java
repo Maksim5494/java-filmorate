@@ -53,9 +53,6 @@ public class InMemoryUserStorage implements UserStorage {
         if (friendships.containsKey(id)) {
             friendships.get(id).remove(friendId);
         }
-        if (friendships.containsKey(friendId)) {
-            friendships.get(friendId).remove(id);
-        }
     }
 
     @Override
@@ -65,7 +62,6 @@ public class InMemoryUserStorage implements UserStorage {
         }
 
         friendships.computeIfAbsent(id, k -> new HashMap<>()).put(friendId, FriendshipStatus.CONFIRMED);
-        friendships.computeIfAbsent(friendId, k -> new HashMap<>()).put(id, FriendshipStatus.CONFIRMED);
     }
 
     @Override

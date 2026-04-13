@@ -65,7 +65,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void updateFilm(int id, Film film) {
+    public Film updateFilm(int id, Film film) {
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
@@ -75,6 +75,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setLikes(oldFilm.getLikes());
         }
         films.put(id, film);
+        return film;
     }
 
     @Override
