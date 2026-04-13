@@ -40,7 +40,7 @@ class MapTest {
     void shouldReturnNullForNonexistentGenreId() {
         genres.put(3, new Genre(3, "Horror"));
         assertNull(genres.get(999));
-        assertFalse(genres.containsKey(999));  // Дополнительная проверка
+        assertFalse(genres.containsKey(999));
     }
 
     @Test
@@ -65,7 +65,6 @@ class MapTest {
                         tuple(6, "Thriller")
                 );
     }
-
 
     @Test
     void shouldNotAllowDuplicateId() {

@@ -127,7 +127,6 @@ class UserValidationTest {
         assertThat(violations).isEmpty();
     }
 
-
     @Test
     void testAddAndRemoveFriend() {
         User u1 = createTestUser("User1", "u1@test.com");

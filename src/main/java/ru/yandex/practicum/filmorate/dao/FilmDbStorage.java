@@ -71,7 +71,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
-        return film;
+        return getFilmById(film.getId());
     }
 
     @Override
@@ -94,12 +94,9 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", id);
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            String sqlGenre = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
             for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update("INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)", id, genre.getId());
-            }
-        } else if (oldFilm.getGenres() != null) {
-            for (Genre genre : oldFilm.getGenres()) {
-                jdbcTemplate.update("INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)", id, genre.getId());
+                jdbcTemplate.update(sqlGenre, id, genre.getId());
             }
         }
     }
@@ -183,5 +180,39 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT EXISTS(SELECT 1 FROM films WHERE id = ?)";
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
         return exists != null && exists;
+    }
+
+    public List<Genre> getAllGenres() {
+        String sql = "SELECT * FROM genres ORDER BY id";
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Genre(rs.getInt("id"), rs.getString("name")));
+    }
+
+    public Genre getGenreById(int id) {
+        String sql = "SELECT * FROM genres WHERE id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql,
+                    (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")),
+                    id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Жанр с id " + id + " не найден");
+        }
+    }
+
+    public List<Mpa> getAllMpa() {
+        String sql = "SELECT * FROM mpa ORDER BY id";
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Mpa(rs.getInt("id"), rs.getString("name")));
+    }
+
+    public Mpa getMpaById(int id) {
+        String sql = "SELECT * FROM mpa WHERE id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql,
+                    (rs, rowNum) -> new Mpa(rs.getInt("id"), rs.getString("name")),
+                    id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Рейтинг MPA с id " + id + " не найден");
+        }
     }
 }

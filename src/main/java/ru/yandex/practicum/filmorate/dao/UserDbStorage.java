@@ -25,6 +25,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<User> userMapper = new RowMapper<>() {
+
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
             User user = new User();
@@ -112,22 +113,28 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
-    }
-
-    @Override
-    public void removeFriend(int id, int friendId) {
-        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
+        String sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, id, friendId, "CONFIRMED");
     }
 
     @Override
     public List<User> getFriends(int id) {
-        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
+        String sql = "SELECT u.* FROM users u JOIN friendships f ON u.id = f.friend_id WHERE f.user_id = ?";
+        return jdbcTemplate.query(sql, userMapper, id);
     }
 
     @Override
     public List<User> getCommonFriends(int id, int otherId) {
-        throw new UnsupportedOperationException("Friendship storage is not implemented for DB yet");
+        String sql = "SELECT u.* FROM users u " +
+                "JOIN friendships f1 ON u.id = f1.friend_id " +
+                "JOIN friendships f2 ON u.id = f2.friend_id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?";
+        return jdbcTemplate.query(sql, userMapper, id, otherId);
+    }
+
+    @Override
+    public void removeFriend(int id, int friendId) {
+        throw new UnsupportedOperationException("Friendships storage is not implemented for DB yet");
     }
 
     @Override
