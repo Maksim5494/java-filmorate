@@ -15,20 +15,19 @@ public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(NotFoundException e) {
+    public Map<String, String> handleNotFound(final NotFoundException e) {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidation(ValidationException e) {
+    public Map<String, String> handleValidation(final Exception e) {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleBeanValidation(MethodArgumentNotValidException e) {
-        return Map.of("error", e.getMessage());
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleUnexpected(final Throwable e) {
+        return Map.of("error", "Произошла непредвиденная ошибка: " + e.getMessage());
     }
-
 }
