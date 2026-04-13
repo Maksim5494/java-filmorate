@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -11,15 +12,21 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
-    private final Map<Integer, Set<Integer>> friendships = new HashMap<>();
+
+    private final Map<Integer, Map<Integer, FriendshipStatus>> friendships = new HashMap<>();
     private int idCounter = 0;
 
-    @Override
-    public User addUser(User user) {
-        user.setId(++idCounter);
-        users.put(idCounter, user);
-        return user;
-    }
+   @Override
+   public User addUser(User user) {
+       if (user.getName() == null || user.getName().isBlank()) {
+           user.setName(user.getLogin());
+       }
+
+       user.setId(++idCounter);
+       users.put(idCounter, user);
+
+       return user;
+   }
 
     @Override
     public User getUserById(int id) {
@@ -42,64 +49,57 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public void removeFriend(int id, int friendId) {
+        if (friendships.containsKey(id)) {
+            friendships.get(id).remove(friendId);
+        }
+    }
+
+    @Override
     public void addFriend(int id, int friendId) {
         if (!users.containsKey(id) || !users.containsKey(friendId)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
-        friendships.computeIfAbsent(id, k -> new HashSet<>()).add(friendId);
-        friendships.computeIfAbsent(friendId, k -> new HashSet<>()).add(id);
-    }
-
-    @Override
-    public void removeFriend(int id, int friendId) {
-        if (!users.containsKey(id) || !users.containsKey(friendId)) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        friendships.getOrDefault(id, new HashSet<>()).remove(friendId);
-        friendships.getOrDefault(friendId, new HashSet<>()).remove(id);
+        friendships.computeIfAbsent(id, k -> new HashMap<>()).put(friendId, FriendshipStatus.CONFIRMED);
     }
 
     @Override
     public List<User> getFriends(int id) {
         if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователь с ID " + id + " не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
 
-        Set<Integer> friendIds = friendships.getOrDefault(id, new HashSet<>());
-        return friendIds.stream()
-                .map(this::getUserById)
-                .filter(Objects::nonNull)
+        Map<Integer, FriendshipStatus> userFriends = friendships.getOrDefault(id, Collections.emptyMap());
+
+        return userFriends.entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(entry -> users.get(entry.getKey()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getCommonFriends(int id1, int id2) {
-        if (!users.containsKey(id1) || !users.containsKey(id2)) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        Set<Integer> friends1 = friendships.getOrDefault(id1, Collections.emptyMap()).entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
 
-        Set<Integer> friends1 = friendships.getOrDefault(id1, new HashSet<>());
-        Set<Integer> friends2 = friendships.getOrDefault(id2, new HashSet<>());
+        Set<Integer> friends2 = friendships.getOrDefault(id2, Collections.emptyMap()).entrySet().stream()
+                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
 
-        Set<Integer> commonIds = new HashSet<>(friends1);
-        commonIds.retainAll(friends2);
-
-        return commonIds.stream()
-                .map(this::getUserById)
-                .filter(Objects::nonNull)
+        return friends1.stream()
+                .filter(friends2::contains)
+                .map(users::get)
                 .collect(Collectors.toList());
     }
 
     @Override
     public boolean exists(int id) {
-        return users.containsKey(id);
-    }
 
-    @Override
-    public void deleteFriend(int userId, int friendId) {
-        removeFriend(userId, friendId);
+        return users.containsKey(id);
     }
 
     @Override
