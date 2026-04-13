@@ -31,6 +31,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getAllFilms() {
+
         return filmService.getAllFilms();
     }
 
