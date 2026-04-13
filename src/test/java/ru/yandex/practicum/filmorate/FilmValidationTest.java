@@ -67,7 +67,8 @@ public class FilmValidationTest {
 
         filmService.addLike(addedFilm.getId(), userId);
 
-        assertThat(filmService.getFilmById(addedFilm.getId()).getLikes()).contains(userId);
+        Film retrievedFilm = filmService.getFilmById(addedFilm.getId());
+        assertThat(retrievedFilm.getLikes()).contains(userId);
     }
 
     @Test
@@ -167,6 +168,7 @@ public class FilmValidationTest {
 
         Film updatedFilm = createValidFilm();
         updatedFilm.setId(createdFilm.getId());
+        updatedFilm.setName("Обновленное название"); // Добавлено
         updatedFilm.setDescription("Обновленное описание");
 
         Film result = filmService.updateFilm(createdFilm.getId(), updatedFilm);
