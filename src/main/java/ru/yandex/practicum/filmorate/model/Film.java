@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,12 +23,15 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов")
     private String description;
 
+    @NotNull
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private int duration;
 
     private Set<Integer> likes = new HashSet<>();
+
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
         this.id = id;
@@ -36,11 +42,11 @@ public class Film {
         this.mpa = mpa;
     }
 
-    public int getLikesCount() {
-        return likes.size();
-    }
+    private Mpa mpa;
 
-    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+    public int getLikesCount() {
+        return likes == null ? 0 : likes.size();
+    }
 
     public void addGenre(Genre genre) {
         genres.add(genre);
@@ -53,6 +59,4 @@ public class Film {
     public void setGenres(Set<Genre> genres) {
         this.genres = new LinkedHashSet<>(genres);
     }
-
-    private Mpa mpa;
 }

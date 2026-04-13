@@ -70,7 +70,7 @@ class MapTest {
     @Test
     void shouldNotAllowDuplicateId() {
         Genre firstGenre = new Genre(1, "Action");
-        Genre secondGenre = new Genre(1, "Another Action");  // Тот же ID, другое название
+        Genre secondGenre = new Genre(1, "Another Action");
 
         genres.put(firstGenre.getId(), firstGenre);
         genres.put(secondGenre.getId(), secondGenre);
@@ -88,7 +88,7 @@ class MapTest {
     @Test
     void shouldReturnZeroWhenMapIsEmpty() {
         genres.put(1, new Genre(1, "Action"));
-        genres.remove(1);  // Удалили единственный жанр
+        genres.remove(1);
         List<Genre> allGenres = new ArrayList<>(genres.values());
         assertEquals(0, allGenres.size());
     }

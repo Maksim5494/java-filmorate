@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -39,20 +40,21 @@ public class UserDbStorage implements UserStorage {
         }
     };
 
+    @Override
     public User addUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
 
-        String checkSql = "SELECT * FROM users WHERE email = ?";
-        List<User> existingUsers = jdbcTemplate.query(checkSql, userMapper, user.getEmail());
-        if (!existingUsers.isEmpty()) {
-            throw new RuntimeException("User with this email already exists");
+        String checkSql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, user.getEmail());
+        if (count != null && count > 0) {
+            throw new IllegalArgumentException("Пользователь с таким email уже существует");
         }
 
         String insertSql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, user.getEmail());
@@ -62,7 +64,12 @@ public class UserDbStorage implements UserStorage {
             return ps;
         }, keyHolder);
 
-        user.setId(keyHolder.getKey().intValue());
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("Не удалось получить ID созданного пользователя");
+        }
+
+        user.setId(key.intValue());
         return user;
     }
 
@@ -79,7 +86,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(int id, User updatedUser) {
         if (!exists(id)) {
-            throw new RuntimeException("User with id " + id + " not found");
+            throw new NotFoundException("Пользователь " + id + " не найден");
         }
 
         if (updatedUser.getName() == null || updatedUser.getName().isBlank()) {
@@ -100,8 +107,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        String sql = "SELECT * FROM users ORDER BY id";
-        return jdbcTemplate.query(sql, userMapper);
+        return jdbcTemplate.query("SELECT * FROM users ORDER BY id", userMapper);
     }
 
     @Override

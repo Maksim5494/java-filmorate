@@ -10,6 +10,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ConstraintViolation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -141,23 +142,26 @@ public class FilmValidationTest {
         assertThat(violations).isNotEmpty();
     }
 
-    @Test
-    public void testAddFilm() {
+    private Film createValidFilm() {
         Film film = new Film();
         film.setName("Test Film");
         film.setDescription("Description");
-        film.setReleaseDate(LocalDate.now());
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
+        film.setMpa(new Mpa(1, "G")); // Добавляем MPA
+        return film;
+    }
 
+    @Test
+    public void testAddFilm() {
+        Film film = createValidFilm();
         Film addedFilm = filmService.addFilm(film);
-
         assertThat(addedFilm).isNotNull();
         assertThat(addedFilm.getId()).isGreaterThan(0);
     }
 
     @Test
     void testUpdateFilm() {
-        // 1. Сначала создаем фильм
         Film film = new Film();
         film.setName("Фильм для обновления");
         film.setDescription("Описание");

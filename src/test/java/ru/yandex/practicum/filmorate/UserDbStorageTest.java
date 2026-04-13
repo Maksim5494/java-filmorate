@@ -59,8 +59,8 @@ class UserDbStorageTest {
 
     @Test
     void testFindNonexistentUser() {
-        User user = userStorage.getUserById(-1);  // ID, которого точно нет в базе
-        assertThat(user).isNull();  // Или другой ожидаемый результат, например, исключение
+        User user = userStorage.getUserById(-1);
+        assertThat(user).isNull();
     }
 
     @Test
@@ -71,7 +71,7 @@ class UserDbStorageTest {
         User newUserWithSameEmail = new User(0, "unique@email.ru", "anotherUser", "anotherUser", LocalDate.of(1995, 5, 5));
         Throwable exception = catchThrowable(() -> userStorage.addUser(newUserWithSameEmail));
 
-        assertThat(exception).isInstanceOf(RuntimeException.class);  // Или другой ожидаемый тип исключения
+        assertThat(exception).isInstanceOf(RuntimeException.class);
     }
 
 }
