@@ -14,9 +14,11 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Component("filmDbStorage")
 @RequiredArgsConstructor
@@ -85,12 +87,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getTopFilms(int count) {
         String sql = """
-                SELECT f.*, m.name AS mpa_name, COUNT(l.user_id) AS likes_count
+                SELECT f.*, m.name AS mpa_name
                 FROM films f
-                LEFT JOIN mpa m ON f.mpa_id = m.id
-                LEFT JOIN likes l ON f.id = l.film_id
-                GROUP BY f.id, m.name
-                ORDER BY likes_count DESC, f.id ASC
+                JOIN mpa m ON f.mpa_id = m.id
+                ORDER BY (SELECT COUNT(*) FROM likes l WHERE l.film_id = f.id) DESC, f.id ASC
                 LIMIT ?
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
@@ -143,8 +143,16 @@ public class FilmDbStorage implements FilmStorage {
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
         film.setMpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")));
-        film.setGenres(getGenresByFilmId(film.getId())); // Здесь теперь всё ок
+        film.setGenres(getGenresByFilmId(film.getId()));
+        film.setLikes(getLikesByFilmId(film.getId()));
         return film;
+    }
+
+    private Set<Integer> getLikesByFilmId(int filmId) {
+        String sql = "SELECT user_id FROM likes WHERE film_id = ?";
+        return new HashSet<>(jdbcTemplate.query(sql,
+                (rs, rowNum) -> rs.getInt("user_id"),
+                filmId));
     }
 
     private void updateGenres(Film film) {
