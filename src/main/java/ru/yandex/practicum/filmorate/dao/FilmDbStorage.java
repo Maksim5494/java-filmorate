@@ -14,11 +14,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Component("filmDbStorage")
 @RequiredArgsConstructor
@@ -157,16 +153,23 @@ public class FilmDbStorage implements FilmStorage {
 
     private void updateGenres(Film film) {
         jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
-        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            LinkedHashSet<Genre> uniqueGenres = new LinkedHashSet<>(film.getGenres());
-            String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
-            for (Genre genre : uniqueGenres) {
-                jdbcTemplate.update(sql, film.getId(), genre.getId());
-            }
-            film.setGenres(uniqueGenres);
-        } else {
+
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
             film.setGenres(new LinkedHashSet<>());
+            return;
         }
+
+        List<Object[]> batchValues = new ArrayList<>();
+        LinkedHashSet<Genre> uniqueGenres = new LinkedHashSet<>(film.getGenres());
+
+        for (Genre genre : uniqueGenres) {
+            batchValues.add(new Object[]{film.getId(), genre.getId()});
+        }
+
+        String sql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+        jdbcTemplate.batchUpdate(sql, batchValues);
+
+        film.setGenres(uniqueGenres);
     }
 
     private LinkedHashSet<Genre> getGenresByFilmId(int filmId) {
