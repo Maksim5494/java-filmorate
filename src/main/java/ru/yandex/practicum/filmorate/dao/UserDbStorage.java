@@ -78,7 +78,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        return jdbcTemplate.query("SELECT * FROM users", userMapper);
+        return jdbcTemplate.query("SELECT * FROM users ORDER BY id", userMapper);
     }
 
     @Override
