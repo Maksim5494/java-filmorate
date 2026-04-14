@@ -97,6 +97,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("DELETE FROM likes");
         jdbcTemplate.update("DELETE FROM film_genres");
         jdbcTemplate.update("DELETE FROM films");
+        jdbcTemplate.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1");
     }
 
     @Override

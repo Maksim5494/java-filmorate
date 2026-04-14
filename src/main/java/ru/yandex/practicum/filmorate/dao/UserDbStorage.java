@@ -134,5 +134,6 @@ public class UserDbStorage implements UserStorage {
     public void clearUsers() {
         jdbcTemplate.update("DELETE FROM friendships");
         jdbcTemplate.update("DELETE FROM users");
+        jdbcTemplate.update("ALTER TABLE users ALTER COLUMN id RESTART WITH 1");
     }
 }
