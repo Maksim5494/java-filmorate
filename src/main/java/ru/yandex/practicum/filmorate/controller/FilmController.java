@@ -31,6 +31,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getAllFilms() {
+
         return filmService.getAllFilms();
     }
 
@@ -41,6 +42,7 @@ public class FilmController {
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
+
         filmService.addLike(filmId, userId);
     }
 

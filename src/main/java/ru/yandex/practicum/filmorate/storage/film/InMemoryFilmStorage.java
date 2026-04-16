@@ -3,7 +3,14 @@ package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import java.util.*;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -14,6 +21,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         film.setId(++idCounter);
+        if (film.getLikes() == null) {
+            film.setLikes(new java.util.HashSet<>());
+        }
         films.put(film.getId(), film);
         return film;
     }
@@ -21,6 +31,26 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public boolean exists(int id) {
         return films.containsKey(id);
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        return List.of();
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Mpa> getAllMpa() {
+        return List.of();
+    }
+
+    @Override
+    public Mpa getMpaById(int id) {
+        return null;
     }
 
     @Override
@@ -35,12 +65,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void updateFilm(int id, Film film) {
+    public Film updateFilm(int id, Film film) {
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
+        Film oldFilm = films.get(id);
         film.setId(id);
+        if (film.getLikes() == null) {
+            film.setLikes(oldFilm.getLikes());
+        }
         films.put(id, film);
+        return film;
     }
 
     @Override
@@ -67,7 +102,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getTopFilms(int count) {
         return films.values().stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikesCount(), f1.getLikesCount()))
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
